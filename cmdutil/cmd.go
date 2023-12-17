@@ -33,7 +33,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 }
 */
 
-func inSliceString(e string, slice []string) int {
+func InSliceString(e string, slice []string) int {
 	i := 0
 	for _, s := range slice {
 		if s == e {
@@ -99,7 +99,7 @@ func Runcmd(c *exec.Cmd, command string, args ...string) error {
 		os.Stdout = original_stdout
 	}()
 	// redirection stdin
-	rediretInFile := inSliceString("<", args)
+	rediretInFile := InSliceString("<", args)
 	if rediretInFile >= 0 {
 		fileout, err := os.Open(args[rediretInFile+1])
 		if err != nil {
@@ -110,7 +110,7 @@ func Runcmd(c *exec.Cmd, command string, args ...string) error {
 		args = append(args[:rediretInFile], args[rediretInFile+2:]...)
 	}
 	// redirection stdout
-	rediretOutFile := inSliceString(">", args)
+	rediretOutFile := InSliceString(">", args)
 	if rediretOutFile >= 0 {
 		fileout, err := os.Create(args[rediretOutFile+1])
 		if err != nil {
@@ -121,7 +121,7 @@ func Runcmd(c *exec.Cmd, command string, args ...string) error {
 		args = append(args[:rediretOutFile], args[rediretOutFile+2:]...)
 	}
 	// special commands
-	if inSliceString(command, keysOfStringMap(command_keyword)) >= 0 {
+	if InSliceString(command, keysOfStringMap(command_keyword)) >= 0 {
 		return RunSpecCase(c, command, args...)
 	}
 	// run command

@@ -19,6 +19,7 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"starburst": sao,
 	"sb":        sao,
 	"sao":       sao,
+	"cat":       cat,
 }
 
 func RunSpecCase(c *exec.Cmd, command string, args ...string) error {
@@ -42,6 +43,31 @@ func chdir(c *exec.Cmd, args ...string) error {
 
 func cls(c *exec.Cmd, args ...string) error {
 	fmt.Println("\033[2J")
+	fmt.Println("\033[2J")
+	fmt.Println("\033[2J")
+	return nil
+}
+
+func cat(c *exec.Cmd, args ...string) error {
+	easteregg := InSliceString("-cat", args)
+	if easteregg >= 0 {
+		args = append(args[:easteregg], args[easteregg+1:]...)
+		fmt.Println(` 　　　　　　 ＿＿
+　　　　　 ／＞　　フ
+　　　　　| 　_　 _ |
+　 　　　／` + "`" + ` ミ＿xノ
+　　 　 /　　　 　 |
+　　　 /　 ヽ　　 ﾉ
+　 　 │　　|　|　|
+　／￣|　　 |　|　|
+　| (￣ヽ＿_ヽ_)__)
+　＼二つ`)
+	}
+	output, err := NewCmd(c, exec.Command("cat", args...)).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(output))
 	return nil
 }
 
