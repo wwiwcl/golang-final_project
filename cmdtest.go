@@ -138,7 +138,7 @@ func runcmd(c *exec.Cmd, command string, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(output))
+	fmt.Printf(string(output))
 	return nil
 }
 
@@ -146,7 +146,7 @@ func main() {
 	c := exec.Command("ls")
 	for cmd_alive {
 		getcwd(c)
-		fmt.Println(c.Dir)
+		//fmt.Println(c.Dir)
 		fmt.Print("> ")
 		reader := bufio.NewReader(os.Stdin)
 		input, _, err := reader.ReadLine()
