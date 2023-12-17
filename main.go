@@ -18,12 +18,15 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		input, _, err := reader.ReadLine()
 		if err != nil {
-			fmt.Println("InputError:", err)
+			fmt.Fprintln(os.Stderr, "InputError:", err)
 			continue
 		}
 		args := strings.Split(string(input), " ")
 		if len(args) > 0 {
-			cmdutil.Runcmd(c, args[0], args[1:]...)
+			err := cmdutil.Runcmd(c, args[0], args[1:]...)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
 		}
 	}
 }
