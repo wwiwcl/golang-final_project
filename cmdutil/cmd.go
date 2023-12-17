@@ -92,6 +92,34 @@ func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	}
 }
 
+func checkRedirection(mode int, args *[]string) (bool, *os.File, error) {
+	if mode == 0 {
+		rediretInFile := InSliceString("<", *args)
+		if rediretInFile >= 0 {
+			fileout, err := os.Open((*args)[rediretInFile+1])
+			if err != nil {
+				return false, os.Stdin, err
+			}
+			*args = append((*args)[:rediretInFile], (*args)[rediretInFile+2:]...)
+			return true, fileout, nil
+		}
+		return false, os.Stdin, nil
+	}
+	if mode == 1 {
+		rediretOutFile := InSliceString(">", *args)
+		if rediretOutFile >= 0 {
+			fileout, err := os.Create((*args)[rediretOutFile+1])
+			if err != nil {
+				return false, os.Stdout, err
+			}
+			*args = append((*args)[:rediretOutFile], (*args)[rediretOutFile+2:]...)
+			return true, fileout, nil
+		}
+		return false, os.Stdout, nil
+	}
+	return false, os.Stderr, nil
+}
+
 func Runcmd(c *exec.Cmd, command string, args ...string) error {
 	defer func() {
 		os.Stdin = original_stdin
@@ -99,26 +127,22 @@ func Runcmd(c *exec.Cmd, command string, args ...string) error {
 		os.Stdout = original_stdout
 	}()
 	// redirection stdin
-	rediretInFile := InSliceString("<", args)
-	if rediretInFile >= 0 {
-		fileout, err := os.Open(args[rediretInFile+1])
-		if err != nil {
-			return err
-		}
-		defer fileout.Close()
-		redirection(0, fileout)
-		args = append(args[:rediretInFile], args[rediretInFile+2:]...)
+	redirectin, filein, err := checkRedirection(0, &args)
+	if err != nil {
+		return err
+	}
+	if redirectin {
+		defer filein.Close()
+		redirection(0, filein)
 	}
 	// redirection stdout
-	rediretOutFile := InSliceString(">", args)
-	if rediretOutFile >= 0 {
-		fileout, err := os.Create(args[rediretOutFile+1])
-		if err != nil {
-			return err
-		}
+	redirectout, fileout, err := checkRedirection(1, &args)
+	if err != nil {
+		return err
+	}
+	if redirectout {
 		defer fileout.Close()
 		redirection(1, fileout)
-		args = append(args[:rediretOutFile], args[rediretOutFile+2:]...)
 	}
 	// special commands
 	if InSliceString(command, keysOfStringMap(command_keyword)) >= 0 {
