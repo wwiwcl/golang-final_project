@@ -6,7 +6,7 @@ go mod tidy
 
 cd ..\cmdutil
 go mod init cmdutil
-go mod edit -replace a.b/sl=../sl
+go mod edit -replace sl=../sl
 go mod tidy
 
 cd ..
@@ -17,6 +17,6 @@ for %%F in ("%batchFilePath%.") do (
 )
 
 go mod init %folderName%
-go mod edit -replace a.b/sl=./sl
+go mod edit -replace sl=./sl
 go mod edit -replace cmdutil=./cmdutil
 go mod tidy

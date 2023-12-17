@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"a.b/sl"
+	"sl"
 )
 
 var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{

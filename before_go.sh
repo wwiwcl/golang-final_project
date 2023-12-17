@@ -6,11 +6,11 @@ go mod tidy
 
 cd ../cmdutil
 go mod init cmdutil
-go mod edit -replace a.b/sl=../sl
+go mod edit -replace sl=../sl
 go mod tidy
 
 cd ..
 go mod init %PWD
-go mod edit -replace a.b/sl=./sl
+go mod edit -replace sl=./sl
 go mod edit -replace cmdutil=./cmdutil
 go mod tidy
