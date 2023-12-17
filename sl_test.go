@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time" // time.Sleep()
 	"seehuhn.de/go/ncurses" // https://pkg.go.dev/github.com/seehuhn/go-ncurses
 )
 
@@ -120,7 +121,10 @@ func animation(win Window){
 	TERM_LINES, TERM_WIDTH := win.GetMaxYX()
 
 	for i := TERM_WIDTH - 1; ; i--{
+		win.Erase()
 		add_sl(win, i)
+		
+		time.Sleep(40000) // 40000 nanoseconds 
 	}
 }
 
