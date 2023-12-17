@@ -101,7 +101,7 @@ func Runcmd(c *exec.Cmd, command string, args ...string) error {
 	// redirection stdin
 	rediretInFile := inSliceString("<", args)
 	if rediretInFile >= 0 {
-		fileout, err := os.Create(args[rediretInFile+1])
+		fileout, err := os.Open(args[rediretInFile+1])
 		if err != nil {
 			return err
 		}
