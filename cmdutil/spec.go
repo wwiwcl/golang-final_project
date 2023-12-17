@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
-	"sl"
 	"time"
+
+	"a.b/sl"
 )
 
 var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
