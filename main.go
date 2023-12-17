@@ -118,9 +118,9 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"exit":      exit,
 	"sl":        sl,
 	"cls":       cls,
+	"sao":       sao,
 	"starburst": sao,
 	"sb":        sao,
-	"sao":       sao,
 }
 
 // /////////////////////wip///////////////////////
