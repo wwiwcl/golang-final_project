@@ -114,6 +114,7 @@ func exit(c *exec.Cmd, args ...string) error {
 var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"mkdir":     mkdir,
 	"chdir":     chdir,
+	"cd":        chdir,
 	"exit":      exit,
 	"sl":        sl,
 	"cls":       cls,
