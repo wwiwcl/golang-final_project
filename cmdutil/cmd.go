@@ -9,65 +9,113 @@ import (
 	"strings"
 )
 
-var Cmd_alive bool = true
-var original_stdin = os.Stdin
-var original_stderr = os.Stderr
-var original_stdout = os.Stdout
-var Out []io.WriteCloser = []io.WriteCloser{os.Stdout}
-var In []io.ReadCloser = []io.ReadCloser{os.Stdin}
-var Err []io.WriteCloser = []io.WriteCloser{os.Stderr}
-
-func Input() ([]byte, error) {
-	var read []byte
-	var err error
-	for _, inputs := range In {
-		read, err = io.ReadAll(inputs)
+func ResetBuffer(pipe ...bool) error {
+	os.Remove(InBufferFile.Name())
+	os.Remove(ErrBufferFile.Name())
+	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
+	if len(pipe) > 0 {
+		err := pipelinePass()
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return read, nil
+	os.Remove(OutBufferFile.Name())
+	OutBufferFile, _ = os.CreateTemp("", ".outbuffer")
+	ErrBufferFile, _ = os.CreateTemp("", ".errbuffer")
+	os.Stdin = InBufferFile
+	os.Stdout = OutBufferFile
+	os.Stderr = ErrBufferFile
+	return nil
 }
 
-func Output(contain []byte) ([]byte, error) {
+var contents []byte
+
+func CloseBuffer() {
+	os.Remove(InBufferFile.Name())
+	os.Remove(ErrBufferFile.Name())
+	os.Remove(OutBufferFile.Name())
+}
+
+func readStdin() error {
+	reads := []byte{}
+	for _, inputs := range In {
+		read, err := io.ReadAll(inputs)
+		if err != nil {
+			return err
+		}
+		reads = append(reads, read...)
+	}
+	_, err := os.Stdin.Write(reads)
+	os.Stdin.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func pipelinePass() error {
+	_, err := InBufferFile.Write(contents)
+	InBufferFile.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func output(contain []byte) ([]byte, error) {
 	for _, outputs := range Out {
 		_, err := outputs.Write(contain)
 		if err != nil {
 			return []byte{}, err
 		}
+		outputs.Sync()
 	}
 	return contain, nil
 }
 
-func Errput(contain string) (string, error) {
+func errput(contain []byte) ([]byte, error) {
 	for _, outputs := range Err {
-		_, err := io.WriteString(outputs, contain)
+		_, err := outputs.Write(contain)
 		if err != nil {
-			return "", err
+			return []byte{}, err
 		}
+		outputs.Sync()
 	}
 	return contain, nil
+}
+
+func outputsAfterRun() error {
+	defer ResetBuffer()
+	_, err := os.Stdout.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+	contents, err := io.ReadAll(os.Stdout)
+	if err != nil {
+		return err
+	}
+	_, err = output(contents)
+	if err != nil {
+		return err
+	}
+	contents, err = io.ReadAll(os.Stderr)
+	if err != nil {
+		return err
+	}
+	os.Stderr.Close()
+	_, err = errput(contents)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewCmd(c1 *exec.Cmd, c2 *exec.Cmd) *exec.Cmd {
 	// run command in c2 with cwd of c1
 	cmd := exec.Command(c2.Path, c2.Args[1:]...)
-	cmd.Dir = Getcwd(c1)
+	cmd.Dir, _ = Getcwd(c1)
 	return cmd
 }
-
-/*
-func run(c *exec.Cmd, command string, args ...string) error {
-	c.Path = command
-	c.Args = append(c.Args, args...)
-	output, err := c.CombinedOutput()
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(output))
-	return nil
-}
-*/
 
 func InSliceString(e []string, slice []string) int {
 	i := 0
@@ -102,7 +150,7 @@ func PathExists(c *exec.Cmd, path string) bool {
 	return NewCmd(c, exec.Command("ls", path)).Run() == nil
 }
 
-func Getcwd(args ...*exec.Cmd) string {
+func Getcwd(args ...*exec.Cmd) (string, error) {
 	var c *exec.Cmd
 	if len(args) > 0 {
 		c = args[0]
@@ -110,34 +158,33 @@ func Getcwd(args ...*exec.Cmd) string {
 		c = exec.Command("ls")
 	}
 	if c.Dir != "" {
-		return c.Dir
+		return c.Dir, nil
 	}
 	cmd := exec.Command("pwd")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return ""
+		return "", err
 	}
-	return strings.TrimSpace(string(output))
+	return strings.TrimSpace(string(output)), nil
 }
 
 func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	if mode == 0 {
 		os.Stdin = file
 		In = append(In, file)
-		if In[0] == os.Stdin {
+		if In[0] == Stdin {
 			In = In[1:]
 		}
 	} else if mode == 1 {
 		os.Stdout = file
 		Out = append(Out, file)
-		if Out[0] == os.Stdout {
+		if Out[0] == Stdout {
 			Out = Out[1:]
 		}
 	} else {
 		os.Stderr = file
 		Err = append(Err, file)
-		if Err[0] == os.Stderr {
+		if Err[0] == Stderr {
 			Err = Err[1:]
 		}
 	}
@@ -197,43 +244,41 @@ func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
 	return false, []*os.File{}, nil
 }
 
-func resetRedirection(mode ...int) {
+func ResetRedirection(mode ...int) {
 	if len(mode) == 0 {
 		mode = []int{0, 1, 2}
 	}
 	if mode[0] == 0 {
-		os.Stdin = original_stdin
-		In = []io.ReadCloser{os.Stdin}
+		In = []*os.File{Stdin}
 		mode = mode[1:]
 	}
 	if len(mode) == 0 {
 		return
 	}
 	if mode[0] == 1 {
-		os.Stdout = original_stdout
-		Out = []io.WriteCloser{os.Stdout}
+		Out = []*os.File{Stdout}
 		mode = mode[1:]
 	}
 	if len(mode) == 0 {
 		return
 	}
 	if mode[0] == 2 {
-		os.Stderr = original_stderr
-		Err = []io.WriteCloser{os.Stderr}
+		Err = []*os.File{Stderr}
 		return
 	}
 }
 
-func Pipeline(c *exec.Cmd, args ...string) error {
+func run(c *exec.Cmd, command string, args ...string) error {
+	defer outputsAfterRun()
 	// redirection stdin
 	redirectin, filein, err := checkRedirection(0, &args)
 	if err != nil {
 		return err
 	}
 	if redirectin {
-		resetRedirection(0)
+		ResetRedirection(0)
 		for i := 0; i < len(filein); i++ {
-			if filein[i] != os.Stdin && filein[i] != os.Stdout && filein[i] != os.Stderr {
+			if filein[i] != Stdin && filein[i] != Stdout && filein[i] != Stderr {
 				defer filein[i].Close()
 			}
 			redirection(0, filein[i])
@@ -245,9 +290,9 @@ func Pipeline(c *exec.Cmd, args ...string) error {
 		return err
 	}
 	if redirectout {
-		resetRedirection(1)
+		ResetRedirection(1)
 		for i := 0; i < len(fileout); i++ {
-			if fileout[i] != os.Stdin && fileout[i] != os.Stdout && fileout[i] != os.Stderr {
+			if fileout[i] != Stdin && fileout[i] != Stdout && fileout[i] != Stderr {
 				defer fileout[i].Close()
 			}
 			redirection(1, fileout[i])
@@ -259,29 +304,56 @@ func Pipeline(c *exec.Cmd, args ...string) error {
 		return err
 	}
 	if redirecterr {
-		resetRedirection(2)
+		ResetRedirection(2)
 		for i := 0; i < len(fileerr); i++ {
-			if fileerr[i] != os.Stdin && fileerr[i] != os.Stdout && fileerr[i] != os.Stderr {
+			if fileerr[i] != Stdin && fileerr[i] != Stdout && fileerr[i] != Stderr {
 				defer fileerr[i].Close()
 			}
 			redirection(2, fileerr[i])
 		}
 	}
-	return nil
-}
-
-func Runcmd(c *exec.Cmd, command string, args ...string) error {
-	defer resetRedirection()
-	// special commands
+	// run specific
 	if InSliceString([]string{command}, keysOfStringMap(command_keyword)) >= 0 {
 		return RunSpecCase(c, command, args...)
 	}
 	// run command
+	err = readStdin()
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
+		return err
+	}
 	cNew := NewCmd(c, exec.Command(command, args...))
 	output, err := cNew.CombinedOutput()
 	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
 		return err
 	}
 	fmt.Print(string(output))
 	return nil
+}
+
+func pipeline(c *exec.Cmd, command string, args ...string) error {
+	pipe := InSliceString([]string{"|"}, args)
+	for pipe >= 0 {
+		argsAfterPipe := args[pipe+1:]
+		args = args[:pipe]
+		err := run(c, command, args...)
+		if err != nil {
+			return err
+		}
+		args = argsAfterPipe
+		pipe = InSliceString([]string{"|"}, args)
+		ResetBuffer(false)
+	}
+	err := run(c, command, args[0:]...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Runcmd(c *exec.Cmd, command string, args ...string) error {
+	defer ResetRedirection()
+	defer ResetBuffer()
+	return pipeline(c, command, args...)
 }
