@@ -155,13 +155,13 @@ func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	if mode == 0 {
 		os.Stdin = file
 	} else if mode == 1 {
-		os.Stdout = file
+		//os.Stdout = file
 		Out = append(Out, file)
 		if Out[0] == Stdout {
 			Out = Out[1:]
 		}
 	} else {
-		os.Stderr = file
+		//os.Stderr = file
 		Err = append(Err, file)
 		if Err[0] == Stderr {
 			Err = Err[1:]
@@ -198,7 +198,12 @@ func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
 		rediretOutFile = InSliceString([]string{"1>&2"}, *args)
 		if rediretOutFile >= 0 {
 			*args = append((*args)[:rediretOutFile], (*args)[rediretOutFile+1:]...)
-			returnFiles = append(returnFiles, os.Stderr)
+			returnFiles = append(returnFiles, Stderr)
+		}
+		rediretOutFile = InSliceString([]string{">&1", "1>&1"}, *args)
+		if rediretOutFile >= 0 {
+			*args = append((*args)[:rediretOutFile], (*args)[rediretOutFile+1:]...)
+			returnFiles = append(returnFiles, Stdout)
 		}
 		return (len(returnFiles) > 0), returnFiles, nil
 	}
@@ -216,7 +221,12 @@ func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
 		rediretErrFile = InSliceString([]string{"2>&1"}, *args)
 		if rediretErrFile >= 0 {
 			*args = append((*args)[:rediretErrFile], (*args)[rediretErrFile+1:]...)
-			returnFiles = append(returnFiles, os.Stdout)
+			returnFiles = append(returnFiles, Stdout)
+		}
+		rediretErrFile = InSliceString([]string{"2>&2", ">>&2"}, *args)
+		if rediretErrFile >= 0 {
+			*args = append((*args)[:rediretErrFile], (*args)[rediretErrFile+1:]...)
+			returnFiles = append(returnFiles, Stderr)
 		}
 		return (len(returnFiles) > 0), returnFiles, nil
 	}
@@ -247,7 +257,6 @@ func ResetRedirection(mode ...int) {
 }
 
 func run(c *exec.Cmd, command string, args ...string) error {
-	defer outputsAfterRun()
 	// redirection stdin
 	redirectin, filein, err := checkRedirection(0, &args)
 	if err != nil {
@@ -290,6 +299,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 			redirection(2, fileerr[i])
 		}
 	}
+	defer outputsAfterRun()
 	// run specific
 	if InSliceString([]string{command}, keysOfStringMap(command_keyword)) >= 0 {
 		return RunSpecCase(c, command, args...)
