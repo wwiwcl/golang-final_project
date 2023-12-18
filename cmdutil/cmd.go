@@ -36,23 +36,6 @@ func CloseBuffer() {
 	os.Remove(OutBufferFile.Name())
 }
 
-func readStdin() error {
-	reads := []byte{}
-	for _, inputs := range In {
-		read, err := io.ReadAll(inputs)
-		if err != nil {
-			return err
-		}
-		reads = append(reads, read...)
-	}
-	_, err := os.Stdin.Write(reads)
-	os.Stdin.Sync()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func pipelinePass() error {
 	_, err := InBufferFile.Write(contents)
 	InBufferFile.Sync()
@@ -171,10 +154,6 @@ func Getcwd(args ...*exec.Cmd) (string, error) {
 func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	if mode == 0 {
 		os.Stdin = file
-		In = append(In, file)
-		if In[0] == Stdin {
-			In = In[1:]
-		}
 	} else if mode == 1 {
 		os.Stdout = file
 		Out = append(Out, file)
@@ -249,7 +228,6 @@ func ResetRedirection(mode ...int) {
 		mode = []int{0, 1, 2}
 	}
 	if mode[0] == 0 {
-		In = []*os.File{Stdin}
 		mode = mode[1:]
 	}
 	if len(mode) == 0 {
@@ -317,11 +295,12 @@ func run(c *exec.Cmd, command string, args ...string) error {
 		return RunSpecCase(c, command, args...)
 	}
 	// run command
-	err = readStdin()
+	os.Stdin = InBufferFile
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
 		return err
 	}
+	// run pipeline
 	cNew := NewCmd(c, exec.Command(command, args...))
 	output, err := cNew.CombinedOutput()
 	if err != nil {

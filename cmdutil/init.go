@@ -9,7 +9,7 @@ var Stderr = os.Stderr
 var Stdout = os.Stdout
 var Cmd_alive bool
 var Out []*os.File
-var In []*os.File
+var In *os.File
 var Err []*os.File
 var InBufferFile *os.File
 var OutBufferFile *os.File
