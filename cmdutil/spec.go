@@ -32,7 +32,10 @@ func mkdir(c *exec.Cmd, args ...string) error {
 }
 
 func chdir(c *exec.Cmd, args ...string) error {
-	cwd := Getcwd(c)
+	cwd, err := Getcwd(c)
+	if err != nil {
+		return err
+	}
 	c.Dir = JoinPath(cwd, args[0])
 	if NewCmd(c, exec.Command("ls")).Run() != nil {
 		c.Dir = cwd
