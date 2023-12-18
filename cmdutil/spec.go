@@ -22,7 +22,7 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"cat":       cat,
 }
 
-func RunSpecCase(c *exec.Cmd, command string, args ...string) error {
+func runSpecCase(c *exec.Cmd, command string, args ...string) error {
 	return command_keyword[command](c, args...)
 }
 
@@ -36,7 +36,7 @@ func chdir(c *exec.Cmd, args ...string) error {
 	if err != nil {
 		return err
 	}
-	c.Dir = JoinPath(cwd, args[0])
+	c.Dir = joinPath(cwd, args[0])
 	if NewCmd(c, exec.Command("ls")).Run() != nil {
 		c.Dir = cwd
 		return fmt.Errorf("directory %s does not exist", args[0])
@@ -52,7 +52,7 @@ func cls(c *exec.Cmd, args ...string) error {
 }
 
 func cat(c *exec.Cmd, args ...string) error {
-	easteregg := InSliceString([]string{"-cat", "--cat"}, args)
+	easteregg := inSliceString([]string{"-cat", "--cat"}, args)
 	if easteregg >= 0 {
 		args = append(args[:easteregg], args[easteregg+1:]...)
 		fmt.Println(` 　　　　　　 ＿＿

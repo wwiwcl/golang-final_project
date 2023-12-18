@@ -4,6 +4,8 @@ import (
 	"os"
 )
 
+var contents []byte
+
 var Stdin = os.Stdin
 var Stderr = os.Stderr
 var Stdout = os.Stdout
@@ -23,6 +25,6 @@ func init() {
 	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
 	OutBufferFile, _ = os.CreateTemp("", ".outbuffer")
 	ErrBufferFile, _ = os.CreateTemp("", ".errbuffer")
-	ResetBuffer()
-	ResetRedirection()
+	resetBuffer()
+	resetRedirection()
 }
