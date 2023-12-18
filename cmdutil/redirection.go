@@ -1,6 +1,9 @@
 package cmdutil
 
-import "os"
+import (
+	"os"
+	"os/exec"
+)
 
 func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	if mode == 0 {
@@ -20,12 +23,16 @@ func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
 	}
 }
 
-func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
+func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, error) {
 	var returnFiles []*os.File
 	if mode == 0 {
 		rediretInFile := inSliceString([]string{"<"}, *args)
 		for rediretInFile >= 0 {
-			fileout, err := os.Open((*args)[rediretInFile+1])
+			filePath, err := makePath(c, (*args)[rediretInFile+1])
+			if err != nil {
+				return false, []*os.File{}, err
+			}
+			fileout, err := os.Open(filePath)
 			if err != nil {
 				return false, []*os.File{}, err
 			}
@@ -38,7 +45,11 @@ func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
 	if mode == 1 {
 		rediretOutFile := inSliceString([]string{">", "1>"}, *args)
 		for rediretOutFile >= 0 {
-			fileout, err := os.Create((*args)[rediretOutFile+1])
+			filePath, err := makePath(c, (*args)[rediretOutFile+1])
+			if err != nil {
+				return false, []*os.File{}, err
+			}
+			fileout, err := os.Create(filePath)
 			if err != nil {
 				return false, []*os.File{}, err
 			}
@@ -61,7 +72,11 @@ func checkRedirection(mode int, args *[]string) (bool, []*os.File, error) {
 	if mode == 2 {
 		rediretErrFile := inSliceString([]string{"2>", ">>"}, *args)
 		for rediretErrFile >= 0 {
-			fileout, err := os.Create((*args)[rediretErrFile+1])
+			filePath, err := makePath(c, (*args)[rediretErrFile+1])
+			if err != nil {
+				return false, []*os.File{}, err
+			}
+			fileout, err := os.Create(filePath)
 			if err != nil {
 				return false, []*os.File{}, err
 			}

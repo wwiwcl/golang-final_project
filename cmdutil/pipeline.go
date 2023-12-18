@@ -8,7 +8,7 @@ import (
 
 func run(c *exec.Cmd, command string, args ...string) error {
 	// redirection stdin
-	redirectin, filein, err := checkRedirection(0, &args)
+	redirectin, filein, err := checkRedirection(c, 0, &args)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 		}
 	}
 	// redirection stdout
-	redirectout, fileout, err := checkRedirection(1, &args)
+	redirectout, fileout, err := checkRedirection(c, 1, &args)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 		}
 	}
 	// redirection stderr
-	redirecterr, fileerr, err := checkRedirection(2, &args)
+	redirecterr, fileerr, err := checkRedirection(c, 2, &args)
 	if err != nil {
 		return err
 	}

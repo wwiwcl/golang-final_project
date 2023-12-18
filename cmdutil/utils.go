@@ -57,3 +57,14 @@ func isAbsPath(path string) bool {
 func pathExists(c *exec.Cmd, path string) bool {
 	return NewCmd(c, exec.Command("ls", path)).Run() == nil
 }
+
+func makePath(c *exec.Cmd, path string) (string, error) {
+	if isAbsPath(path) {
+		return path, nil
+	}
+	root, err := Getcwd(c)
+	if err != nil {
+		return "", err
+	}
+	return joinPath(root, path), nil
+}

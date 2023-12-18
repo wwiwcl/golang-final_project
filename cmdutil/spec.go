@@ -46,8 +46,6 @@ func chdir(c *exec.Cmd, args ...string) error {
 
 func cls(c *exec.Cmd, args ...string) error {
 	fmt.Println("\033[2J")
-	fmt.Println("\033[2J")
-	fmt.Println("\033[2J")
 	return nil
 }
 
