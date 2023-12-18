@@ -18,7 +18,7 @@ func main() {
 			fmt.Fprintln(cmdutil.Stderr, err)
 		}
 		fmt.Fprint(cmdutil.Stdout, wd)
-		fmt.Fprint(cmdutil.Stdout, "> ")
+		fmt.Fprint(cmdutil.Stdout, "$ ")
 		reader := bufio.NewReader(cmdutil.Stdin)
 		input, _, err := reader.ReadLine()
 		if err != nil {

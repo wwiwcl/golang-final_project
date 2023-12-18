@@ -45,13 +45,18 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 	if mode == 1 {
 		rediretOutFile := inSliceString([]string{">", "1>"}, *args)
 		for rediretOutFile >= 0 {
-			filePath, err := makePath(c, (*args)[rediretOutFile+1])
-			if err != nil {
-				return false, []*os.File{}, err
-			}
-			fileout, err := os.Create(filePath)
-			if err != nil {
-				return false, []*os.File{}, err
+			var fileout *os.File
+			if (*args)[rediretOutFile+1] == "&2" {
+				fileout = Stdout
+			} else {
+				filePath, err := makePath(c, (*args)[rediretOutFile+1])
+				if err != nil {
+					return false, []*os.File{}, err
+				}
+				fileout, err = os.Create(filePath)
+				if err != nil {
+					return false, []*os.File{}, err
+				}
 			}
 			*args = append((*args)[:rediretOutFile], (*args)[rediretOutFile+2:]...)
 			returnFiles = append(returnFiles, fileout)
@@ -72,13 +77,18 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 	if mode == 2 {
 		rediretErrFile := inSliceString([]string{"2>", ">>"}, *args)
 		for rediretErrFile >= 0 {
-			filePath, err := makePath(c, (*args)[rediretErrFile+1])
-			if err != nil {
-				return false, []*os.File{}, err
-			}
-			fileout, err := os.Create(filePath)
-			if err != nil {
-				return false, []*os.File{}, err
+			var fileout *os.File
+			if (*args)[rediretErrFile+1] == "&1" {
+				fileout = Stdout
+			} else {
+				filePath, err := makePath(c, (*args)[rediretErrFile+1])
+				if err != nil {
+					return false, []*os.File{}, err
+				}
+				fileout, err = os.Create(filePath)
+				if err != nil {
+					return false, []*os.File{}, err
+				}
 			}
 			*args = append((*args)[:rediretErrFile], (*args)[rediretErrFile+2:]...)
 			returnFiles = append(returnFiles, fileout)
