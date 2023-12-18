@@ -85,8 +85,11 @@ func errput(contain []byte) ([]byte, error) {
 }
 
 func outputsAfterRun() error {
-	fmt.Fprintln(Stdout, os.Stdout == OutBufferFile)
 	defer ResetBuffer()
+	_, err := os.Stdout.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 	contents, err := io.ReadAll(os.Stdout)
 	if err != nil {
 		return err
