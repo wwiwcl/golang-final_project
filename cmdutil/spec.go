@@ -49,7 +49,7 @@ func cls(c *exec.Cmd, args ...string) error {
 }
 
 func cat(c *exec.Cmd, args ...string) error {
-	easteregg := InSliceString("-cat", args)
+	easteregg := InSliceString([]string{"-cat", "--cat"}, args)
 	if easteregg >= 0 {
 		args = append(args[:easteregg], args[easteregg+1:]...)
 		fmt.Println(` 　　　　　　 ＿＿
