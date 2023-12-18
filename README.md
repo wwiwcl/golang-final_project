@@ -4,11 +4,11 @@
 
 ## now supported stuff:
 all os/exec stuffs <br />
-redirections (maybe) <br />
+pipelines (testing) <br />
+multiple redirections (testing) <br />
 chdir <br />
-cls(work in progress) <br />
-sb/sao/starburst command(Eastereggs) <br />
+cls <br />
+sb/sao/starburst comman (Eastereggs) <br />
 
 ## not supported yet:
 sl(work in progress) <br />
-pipelines <br />
