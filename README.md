@@ -10,9 +10,9 @@ cd <br />
 cls <br />
 color <br />
 Easter eggs: <br />
-  sb/sao/starburst <br />
-  never/rick <br />
-  8ball <br/>
+- sb/sao/starburst <br />
+- never/rick <br />
+- 8ball <br/>
   
 
 ## not supported yet:
