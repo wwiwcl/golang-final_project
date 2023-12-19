@@ -56,6 +56,9 @@ func cls(c *exec.Cmd, args ...string) error {
 }
 
 func setCwdColor(c *exec.Cmd, args ...string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("color: missing argument")
+	}
 	tmpCwdColor, err := strconv.Atoi(args[0])
 	if err != nil {
 		return err
@@ -63,7 +66,7 @@ func setCwdColor(c *exec.Cmd, args ...string) error {
 	if ((tmpCwdColor >= 30) && (tmpCwdColor <= 37)) || ((tmpCwdColor >= 90) && (tmpCwdColor <= 97)) {
 		CwdColor = tmpCwdColor
 	} else {
-		return fmt.Errorf("invalid color code")
+		return fmt.Errorf("color: invalid color code")
 	}
 	return nil
 }
