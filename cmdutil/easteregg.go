@@ -190,6 +190,9 @@ func sao(c *exec.Cmd, args ...string) error {
 }
 
 func magic8Ball(c *exec.Cmd, args ...string) error {
+	if pipe >= 0 {
+		return fmt.Errorf("8ball: pipe is not supported in 8ball")
+	}
 	fmt.Println("The Magic 8-Ball 🎱 says...")
 	contents = readContents()
 	_, err := output(contents)

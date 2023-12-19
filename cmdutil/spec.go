@@ -21,7 +21,6 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"cat":       cat,
 	"rick":      neverGonnaGiveYouUp,
 	"never":     neverGonnaGiveYouUp,
-	"magic":     magic8Ball,
 	"8ball":     magic8Ball,
 	"color":     setCwdColor,
 }
