@@ -32,11 +32,14 @@ func mkdir(c *exec.Cmd, args ...string) error {
 }
 
 func chdir(c *exec.Cmd, args ...string) error {
-	cwd, err := Getcwd(c)
+	cwd, err = Getcwd(c)
 	if err != nil {
 		return err
 	}
-	c.Dir = joinPath(cwd, args[0])
+	c.Dir, err = makePath(c, args[0])
+	if err != nil {
+		return err
+	}
 	if NewCmd(c, exec.Command("ls")).Run() != nil {
 		c.Dir = cwd
 		return fmt.Errorf("directory %s does not exist", args[0])
