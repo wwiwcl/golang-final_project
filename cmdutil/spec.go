@@ -32,7 +32,7 @@ func mkdir(c *exec.Cmd, args ...string) error {
 }
 
 func chdir(c *exec.Cmd, args ...string) error {
-	cwd, err = Getcwd(c)
+	cwd, err := Getcwd(c)
 	if err != nil {
 		return err
 	}
