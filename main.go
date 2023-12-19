@@ -17,7 +17,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintln(cmdutil.Stderr, err)
 		}
-		fmt.Fprint(cmdutil.Stdout, wd)
+		fmt.Fprintf(cmdutil.Stdout, "\033[%dm%s\033[0m", cmdutil.CwdColor, wd)
 		fmt.Fprint(cmdutil.Stdout, "$ ")
 		reader := bufio.NewReader(cmdutil.Stdin)
 		input, _, err := reader.ReadLine()

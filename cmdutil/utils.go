@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 )
 
-func resetBuffer(pipe ...bool) {
+func resetBuffer() {
 	os.Remove(InBufferFile.Name())
 	os.Remove(ErrBufferFile.Name())
 	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
-	if len(pipe) > 0 {
+	if pipe >= 0 {
 		err := pipelinePass()
 		if err != nil {
 			fmt.Fprintln(Stderr, err)

@@ -16,6 +16,8 @@ var Err []*os.File
 var InBufferFile *os.File
 var OutBufferFile *os.File
 var ErrBufferFile *os.File
+var CwdColor int = 95
+var pipe int = -1
 
 func init() {
 	Stdin = os.Stdin

@@ -7,6 +7,7 @@ import (
 )
 
 func run(c *exec.Cmd, command string, args ...string) error {
+	defer resetRedirection()
 	// redirection stdin
 	redirectin, filein, err := checkRedirection(c, 0, &args)
 	if err != nil {
@@ -49,6 +50,22 @@ func run(c *exec.Cmd, command string, args ...string) error {
 			redirection(2, fileerr[i])
 		}
 	}
+	if pipe >= 0 {
+		if Out[0] == Stdout {
+			if len(Out) == 1 {
+				Out = []*os.File{}
+			} else {
+				Out = Out[1:]
+			}
+		}
+		if Err[0] == Stderr {
+			if len(Err) == 1 {
+				Err = []*os.File{}
+			} else {
+				Err = Err[1:]
+			}
+		}
+	}
 	defer outputsAfterRun()
 	// run specific
 	if inSliceString([]string{command}, keysOfStringMap(command_keyword)) >= 0 {
@@ -72,7 +89,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 }
 
 func pipeline(c *exec.Cmd, command string, args ...string) error {
-	pipe := inSliceString([]string{"|"}, args)
+	pipe = inSliceString([]string{"|"}, args)
 	for pipe >= 0 {
 		argsAfterPipe := args[pipe+1:]
 		args = args[:pipe]
@@ -80,11 +97,15 @@ func pipeline(c *exec.Cmd, command string, args ...string) error {
 		if err != nil {
 			return err
 		}
-		args = argsAfterPipe
+		command = argsAfterPipe[0]
+		if len(argsAfterPipe) > 1 {
+			args = argsAfterPipe[1:]
+		} else {
+			args = []string{}
+		}
 		pipe = inSliceString([]string{"|"}, args)
-		resetBuffer(false)
 	}
-	err := run(c, command, args[0:]...)
+	err := run(c, command, args...)
 	if err != nil {
 		return err
 	}

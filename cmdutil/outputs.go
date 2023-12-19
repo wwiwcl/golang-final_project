@@ -27,7 +27,7 @@ func errput(contain []byte) ([]byte, error) {
 	return contain, nil
 }
 
-func outputsAfterRun() {
+func readContents() []byte {
 	defer resetBuffer()
 	_, err := os.Stdout.Seek(0, io.SeekStart)
 	if err != nil {
@@ -39,7 +39,13 @@ func outputsAfterRun() {
 		println(err)
 		// return err
 	}
-	_, err = output(contents)
+	return contents
+}
+
+func outputsAfterRun() {
+	defer resetBuffer()
+	contents = readContents()
+	_, err := output(contents)
 	if err != nil {
 		println(err)
 		// return err
