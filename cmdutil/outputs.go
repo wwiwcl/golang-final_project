@@ -27,28 +27,38 @@ func errput(contain []byte) ([]byte, error) {
 	return contain, nil
 }
 
-func outputsAfterRun() error {
+func outputsAfterRun() {
 	defer resetBuffer()
 	_, err := os.Stdout.Seek(0, io.SeekStart)
 	if err != nil {
-		return err
+		println(err)
+		// return err
 	}
 	contents, err := io.ReadAll(os.Stdout)
 	if err != nil {
-		return err
+		println(err)
+		// return err
 	}
 	_, err = output(contents)
 	if err != nil {
-		return err
+		println(err)
+		// return err
+	}
+	_, err = os.Stderr.Seek(0, io.SeekStart)
+	if err != nil {
+		println(err)
+		// return err
 	}
 	contents, err = io.ReadAll(os.Stderr)
 	if err != nil {
-		return err
+		println(err)
+		// return err
 	}
 	os.Stderr.Close()
 	_, err = errput(contents)
 	if err != nil {
-		return err
+		println(err)
+		// return err
 	}
-	return nil
+	// return nil
 }

@@ -1,19 +1,21 @@
 package cmdutil
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-func resetBuffer(pipe ...bool) error {
+func resetBuffer(pipe ...bool) {
 	os.Remove(InBufferFile.Name())
 	os.Remove(ErrBufferFile.Name())
 	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
 	if len(pipe) > 0 {
 		err := pipelinePass()
 		if err != nil {
-			return err
+			fmt.Fprintln(Stderr, err)
+			// return err
 		}
 	}
 	os.Remove(OutBufferFile.Name())
@@ -22,7 +24,7 @@ func resetBuffer(pipe ...bool) error {
 	os.Stdin = InBufferFile
 	os.Stdout = OutBufferFile
 	os.Stderr = ErrBufferFile
-	return nil
+	// return nil
 }
 
 func inSliceString(e []string, slice []string) int {
