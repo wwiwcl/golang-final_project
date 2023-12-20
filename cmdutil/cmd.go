@@ -3,7 +3,6 @@ package cmdutil
 import (
 	"os"
 	"os/exec"
-	"strings"
 )
 
 func CloseFiles() {
@@ -24,18 +23,11 @@ func Getcwd(args ...*exec.Cmd) (string, error) {
 	var c *exec.Cmd
 	if len(args) > 0 {
 		c = args[0]
-	} else {
-		c = exec.Command("ls")
+		if c.Dir != "" {
+			return c.Dir, nil
+		}
 	}
-	if c.Dir != "" {
-		return c.Dir, nil
-	}
-	cmd := exec.Command("pwd")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(output)), nil
+	return DefaultWd, nil
 }
 
 func Runcmd(c *exec.Cmd, args ...string) error {

@@ -47,7 +47,7 @@ func cat(c *exec.Cmd, args ...string) error {
 　 　 │　　|　|　|
 　／￣|　　 |　|　|
 　| (￣ヽ＿_ヽ_)__)
-　＼二つ`)
+　＼二つ\n`)
 	}
 	err := NewCmd(c, exec.Command("cat", args...)).Run()
 	if err != nil {
@@ -129,7 +129,7 @@ func neverGonnaGiveYouUp(c *exec.Cmd, args ...string) error {
 ⠀⠀⢺⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣵⣳⣿⢿⢻⠟⡿⢿⠿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄
 ⠀⢀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣞⡷⣿⣧⣿⣾⣵⣯⣾⣼⣳⣮⣷⣭⢯⣹⣍⣻⣙⡟⣛⡟⣛⢻⡛⡟⢿⡻⣟⠿⣿⢿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡷
 ⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢺⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
-⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⢻⣞⣿⣦⣳⣴⣦⣵⣬⣖⣭⣞⣭⣏⡿⣹⣛⣟⣻⠻⣟⢻⠟⡿⣻⠿⣟⡿⣟⡿⣿⢿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀`)
+⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⢻⣞⣿⣦⣳⣴⣦⣵⣬⣖⣭⣞⣭⣏⡿⣹⣛⣟⣻⠻⣟⢻⠟⡿⣻⠿⣟⡿⣟⡿⣿⢿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀\n`)
 	return nil
 }
 
@@ -137,23 +137,23 @@ func sao(c *exec.Cmd, args ...string) error {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	switch r.Intn(10) {
 	case 0:
-		io.WriteString(c.Stdout, "克萊因表示：那到底是什麼技能啊？")
+		io.WriteString(c.Stdout, "克萊因表示：那到底是什麼技能啊？\n")
 	case 1:
-		io.WriteString(c.Stdout, "摸......摸頭還要哭")
+		io.WriteString(c.Stdout, "摸......摸頭還要哭\n")
 	case 2:
-		io.WriteString(c.Stdout, "騙人的吧")
+		io.WriteString(c.Stdout, "騙人的吧\n")
 	case 3:
-		io.WriteString(c.Stdout, "這就是等級制的MMO的不合理之處")
+		io.WriteString(c.Stdout, "這就是等級制的MMO的不合理之處\n")
 	case 4:
-		io.WriteString(c.Stdout, "Tips: 這條command也是Switch")
+		io.WriteString(c.Stdout, "Tips: 這條command也是Switch\n")
 	case 5:
-		io.WriteString(c.Stdout, "拜託你們\n先幫我撐個十秒左右就好")
+		io.WriteString(c.Stdout, "拜託你們\n先幫我撐個十秒左右就好\n")
 	case 6:
-		io.WriteString(c.Stdout, "這不是很戲劇化的發展嗎")
+		io.WriteString(c.Stdout, "這不是很戲劇化的發展嗎\n")
 	case 7:
-		io.WriteString(c.Stdout, "令 人 晶 彥")
+		io.WriteString(c.Stdout, "令 人 晶 彥\n")
 	case 8:
-		io.WriteString(c.Stdout, "是隱藏寶箱，好耶")
+		io.WriteString(c.Stdout, "是隱藏寶箱，好耶\n")
 	case 9:
 		io.WriteString(c.Stdout, `1.右劍由左向右揮
 2.左劍刺入後從右上帶出，同時跳起
@@ -184,7 +184,7 @@ func sao(c *exec.Cmd, args ...string) error {
 28.左劍在上，右劍在下，作平行狀，由右向左揮
 29.左劍在上，右劍在下，作平行狀，由左向右揮
 30.右劍突刺，但被對手以左手徒手抓住
-31.左劍突刺，結束`)
+31.左劍突刺，結束\n`)
 	}
 	return nil
 }

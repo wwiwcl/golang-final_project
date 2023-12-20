@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 // func run(c *exec.Cmd, args ...string) error {
@@ -130,7 +131,7 @@ func buildRun(c *exec.Cmd, args ...string) error {
 		return err
 	}
 	if redirectout {
-		files := make([]io.Writer, len(filein))
+		files := make([]io.Writer, len(fileout))
 		for i := 0; i < len(fileout); i++ {
 			if fileout[i] != Stdin && fileout[i] != Stdout && fileout[i] != Stderr {
 				FilesToClose = append(FilesToClose, fileout[i])
@@ -147,7 +148,7 @@ func buildRun(c *exec.Cmd, args ...string) error {
 		return err
 	}
 	if redirecterr {
-		files := make([]io.Writer, len(filein))
+		files := make([]io.Writer, len(fileerr))
 		for i := 0; i < len(fileerr); i++ {
 			if fileerr[i] != Stdin && fileerr[i] != Stdout && fileerr[i] != Stderr {
 				FilesToClose = append(FilesToClose, fileerr[i])
@@ -156,30 +157,12 @@ func buildRun(c *exec.Cmd, args ...string) error {
 		}
 		errRedirection = io.MultiWriter(files...)
 	}
-	if pipe >= 0 {
-		if Out[0] == Stdout {
-			if len(Out) == 1 {
-				Out = []*os.File{}
-			} else {
-				Out = Out[1:]
-			}
-		}
-		if Err[0] == Stderr {
-			if len(Err) == 1 {
-				Err = []*os.File{}
-			} else {
-				Err = Err[1:]
-			}
-		}
-	}
 	command := args[0]
 	if len(args) > 1 {
 		args = args[1:]
 	} else {
 		args = []string{}
 	}
-	// run command
-	os.Stdin = InBufferFile
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
 		return err
@@ -207,10 +190,13 @@ func runCase(c *exec.Cmd) error {
 }
 
 func runAll() error {
+	wg := new(sync.WaitGroup)
 	tasks := make(chan bool, len(cmdPipeline))
 	errors := make(chan error, len(cmdPipeline))
+	wg.Add(len(cmdPipeline))
 	for i := 0; i < len(cmdPipeline); i++ {
-		go func(i int) {
+		go func(i int, wg *sync.WaitGroup) {
+			defer wg.Done()
 			tasks <- true
 			err := runCase(cmdPipeline[i])
 			if err != nil {
@@ -218,8 +204,9 @@ func runAll() error {
 				errors <- err
 			}
 			<-tasks
-		}(i)
+		}(i, wg)
 	}
+	wg.Wait()
 	return nil
 }
 

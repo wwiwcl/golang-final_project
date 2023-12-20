@@ -37,8 +37,10 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 				return false, []*os.File{}, nil
 			}
 			var fileout *os.File
-			if (*args)[rediretOutFile+1] == "&2" {
+			if (*args)[rediretOutFile+1] == "&1" {
 				fileout = Stdout
+			} else if (*args)[rediretOutFile+1] == "&2" {
+				fileout = Stderr
 			} else {
 				filePath, err := makePath(c, (*args)[rediretOutFile+1])
 				if err != nil {
@@ -75,6 +77,8 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 			var fileout *os.File
 			if (*args)[rediretErrFile+1] == "&1" {
 				fileout = Stdout
+			} else if (*args)[rediretErrFile+1] == "&2" {
+				fileout = Stderr
 			} else {
 				filePath, err := makePath(c, (*args)[rediretErrFile+1])
 				if err != nil {

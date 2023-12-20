@@ -3,6 +3,7 @@ package cmdutil
 import (
 	"os"
 	"os/exec"
+	"strings"
 )
 
 var cmdPipeline []*exec.Cmd
@@ -11,21 +12,25 @@ var Stdin = os.Stdin
 var Stderr = os.Stderr
 var Stdout = os.Stdout
 var Cmd_alive bool
-var Out []*os.File
-var In *os.File
-var Err []*os.File
 var FilesToClose []*os.File
-var InBufferFile *os.File
-var OutBufferFile *os.File
-var ErrBufferFile *os.File
 var CwdColor int = 95
 var pipe int = -1
+var DefaultWd string
 
 func init() {
-	Stdin = os.Stdin
-	Stderr = os.Stderr
-	Stdout = os.Stdout
 	Cmd_alive = true
-	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
-	OutBufferFile, _ = os.CreateTemp("", ".outbuffer")
+	err := error(nil)
+	DefaultWd, err = initGetcwd()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initGetcwd() (string, error) {
+	cmd := exec.Command("pwd")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(output)), nil
 }
