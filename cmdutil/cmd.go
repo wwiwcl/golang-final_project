@@ -37,8 +37,8 @@ func Getcwd(args ...*exec.Cmd) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func Runcmd(c *exec.Cmd, command string, args ...string) error {
+func Runcmd(c *exec.Cmd, args ...string) error {
 	defer resetRedirection()
 	defer resetBuffer()
-	return pipeline(c, command, args...)
+	return pipeline(c, args...)
 }

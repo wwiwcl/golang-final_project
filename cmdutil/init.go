@@ -4,6 +4,10 @@ import (
 	"os"
 )
 
+const (
+	maxInputargs = 100
+)
+
 var contents []byte
 
 var Stdin = os.Stdin

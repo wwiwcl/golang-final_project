@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func run(c *exec.Cmd, command string, args ...string) error {
+func run(c *exec.Cmd, args ...string) error {
 	defer resetRedirection()
 	// redirection stdin
 	redirectin, filein, err := checkRedirection(c, 0, &args)
@@ -66,6 +66,12 @@ func run(c *exec.Cmd, command string, args ...string) error {
 			}
 		}
 	}
+	command := args[0]
+	if len(args) > 1 {
+		args = args[1:]
+	} else {
+		args = []string{}
+	}
 	defer outputsAfterRun()
 	// run specific
 	if inSliceString([]string{command}, keysOfStringMap(command_keyword)) >= 0 {
@@ -88,7 +94,7 @@ func run(c *exec.Cmd, command string, args ...string) error {
 	return nil
 }
 
-func pipeline(c *exec.Cmd, command string, args ...string) error {
+func pipeline(c *exec.Cmd, args ...string) error {
 	pipe = inSliceString([]string{"|"}, args)
 	for pipe >= 0 {
 		if len(args) == pipe+1 {
@@ -98,19 +104,14 @@ func pipeline(c *exec.Cmd, command string, args ...string) error {
 		}
 		argsAfterPipe := args[pipe+1:]
 		args = args[:pipe]
-		err := run(c, command, args...)
+		err := run(c, args...)
 		if err != nil {
 			return err
 		}
-		command = argsAfterPipe[0]
-		if len(argsAfterPipe) > 1 {
-			args = argsAfterPipe[1:]
-		} else {
-			args = []string{}
-		}
+		args = argsAfterPipe
 		pipe = inSliceString([]string{"|"}, args)
 	}
-	err := run(c, command, args...)
+	err := run(c, args...)
 	if err != nil {
 		return err
 	}

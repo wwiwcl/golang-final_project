@@ -27,7 +27,7 @@ func main() {
 		}
 		args := strings.Split(string(input), " ")
 		if len(args) > 0 {
-			err := cmdutil.Runcmd(c, args[0], args[1:]...)
+			err := cmdutil.Runcmd(c, args...)
 			if err != nil {
 				fmt.Fprintln(cmdutil.Stderr, err)
 			}
