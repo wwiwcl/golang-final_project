@@ -25,8 +25,8 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"color":     setCwdColor,
 }
 
-func runSpecCase(c *exec.Cmd, command string, args ...string) error {
-	return command_keyword[command](c, args...)
+func runSpecCase(c *exec.Cmd, args ...string) error {
+	return command_keyword[args[0]](c, args[1:]...)
 }
 
 func mkdir(c *exec.Cmd, args ...string) error {

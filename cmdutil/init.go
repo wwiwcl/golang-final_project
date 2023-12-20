@@ -2,13 +2,10 @@ package cmdutil
 
 import (
 	"os"
+	"os/exec"
 )
 
-const (
-	maxInputargs = 100
-)
-
-var contents []byte
+var cmdPipeline []*exec.Cmd
 
 var Stdin = os.Stdin
 var Stderr = os.Stderr
@@ -17,6 +14,7 @@ var Cmd_alive bool
 var Out []*os.File
 var In *os.File
 var Err []*os.File
+var FilesToClose []*os.File
 var InBufferFile *os.File
 var OutBufferFile *os.File
 var ErrBufferFile *os.File
@@ -30,7 +28,4 @@ func init() {
 	Cmd_alive = true
 	InBufferFile, _ = os.CreateTemp("", ".inbuffer")
 	OutBufferFile, _ = os.CreateTemp("", ".outbuffer")
-	ErrBufferFile, _ = os.CreateTemp("", ".errbuffer")
-	resetBuffer()
-	resetRedirection()
 }

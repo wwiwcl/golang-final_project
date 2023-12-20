@@ -6,15 +6,16 @@ import (
 	"strings"
 )
 
-func CloseBuffer() {
-	os.Remove(InBufferFile.Name())
-	os.Remove(ErrBufferFile.Name())
-	os.Remove(OutBufferFile.Name())
+func CloseFiles() {
+	for _, f := range FilesToClose {
+		f.Close()
+	}
+	FilesToClose = []*os.File{}
 }
 
 func NewCmd(c1 *exec.Cmd, c2 *exec.Cmd) *exec.Cmd {
 	// run command in c2 with cwd of c1
-	cmd := exec.Command(c2.Path, c2.Args[1:]...)
+	cmd := exec.Command(c2.Args[0], c2.Args[1:]...)
 	cmd.Dir, _ = Getcwd(c1)
 	return cmd
 }
@@ -38,7 +39,6 @@ func Getcwd(args ...*exec.Cmd) (string, error) {
 }
 
 func Runcmd(c *exec.Cmd, args ...string) error {
-	defer resetRedirection()
-	defer resetBuffer()
+	defer CloseFiles()
 	return pipeline(c, args...)
 }

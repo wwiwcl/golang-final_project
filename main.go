@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	defer cmdutil.CloseBuffer()
+	defer cmdutil.CloseFiles()
 	c := exec.Command("ls")
 	for cmdutil.Cmd_alive {
 		wd, err := cmdutil.Getcwd(c)

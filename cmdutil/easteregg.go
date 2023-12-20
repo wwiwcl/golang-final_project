@@ -2,6 +2,7 @@ package cmdutil
 
 import (
 	"fmt"
+	"io"
 	"math/rand"
 	"os/exec"
 	"time"
@@ -37,10 +38,10 @@ func cat(c *exec.Cmd, args ...string) error {
 	easteregg := inSliceString([]string{"-cat", "--cat"}, args)
 	if easteregg >= 0 {
 		args = append(args[:easteregg], args[easteregg+1:]...)
-		fmt.Println(` 　　　　　　 ＿＿
+		io.WriteString(c.Stdout, ` 　　　　　　 ＿＿
 　　　　　 ／＞　　フ
 　　　　　| 　_　 _ |
-　 　　　／` + "`" + ` ミ＿xノ
+　 　　　／`+"`"+` ミ＿xノ
 　　 　 /　　　 　 |
 　　　 /　 ヽ　　 ﾉ
 　 　 │　　|　|　|
@@ -48,16 +49,15 @@ func cat(c *exec.Cmd, args ...string) error {
 　| (￣ヽ＿_ヽ_)__)
 　＼二つ`)
 	}
-	output, err := NewCmd(c, exec.Command("cat", args...)).CombinedOutput()
+	err := NewCmd(c, exec.Command("cat", args...)).Run()
 	if err != nil {
 		return err
 	}
-	fmt.Print(string(output))
 	return nil
 }
 
 func neverGonnaGiveYouUp(c *exec.Cmd, args ...string) error {
-	fmt.Println(`⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⢆⡱⢫⡟⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⢿⣻⢿⣟⡿⡤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+	io.WriteString(c.Stdout, `⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⢆⡱⢫⡟⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⢿⣻⢿⣟⡿⡤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⠠⠀⢂⡘⢦⡳⣏⣾⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣞⣿⣳⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠐⠈⣌⢣⡑⢦⣙⢮⣳⢻⡾⣿⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣾⢷⣿⢯⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣌⡳⢈⡒⡌⡖⣭⢺⡭⣞⡥⣏⣿⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣻⣟⡾⣏⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -137,25 +137,25 @@ func sao(c *exec.Cmd, args ...string) error {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	switch r.Intn(10) {
 	case 0:
-		fmt.Println("克萊因表示：那到底是什麼技能啊？")
+		io.WriteString(c.Stdout, "克萊因表示：那到底是什麼技能啊？")
 	case 1:
-		fmt.Println("摸......摸頭還要哭")
+		io.WriteString(c.Stdout, "摸......摸頭還要哭")
 	case 2:
-		fmt.Println("騙人的吧")
+		io.WriteString(c.Stdout, "騙人的吧")
 	case 3:
-		fmt.Println("這就是等級制的MMO的不合理之處")
+		io.WriteString(c.Stdout, "這就是等級制的MMO的不合理之處")
 	case 4:
-		fmt.Println("Tips: 這條command也是Switch")
+		io.WriteString(c.Stdout, "Tips: 這條command也是Switch")
 	case 5:
-		fmt.Println("拜託你們\n先幫我撐個十秒左右就好")
+		io.WriteString(c.Stdout, "拜託你們\n先幫我撐個十秒左右就好")
 	case 6:
-		fmt.Println("這不是很戲劇化的發展嗎")
+		io.WriteString(c.Stdout, "這不是很戲劇化的發展嗎")
 	case 7:
-		fmt.Println("令 人 晶 彥")
+		io.WriteString(c.Stdout, "令 人 晶 彥")
 	case 8:
-		fmt.Println("是隱藏寶箱，好耶")
+		io.WriteString(c.Stdout, "是隱藏寶箱，好耶")
 	case 9:
-		fmt.Println(`1.右劍由左向右揮
+		io.WriteString(c.Stdout, `1.右劍由左向右揮
 2.左劍刺入後從右上帶出，同時跳起
 3.轉身，右劍由左向右揮
 4.左劍由左向右揮
@@ -193,21 +193,16 @@ func magic8Ball(c *exec.Cmd, args ...string) error {
 	if pipe >= 0 {
 		return fmt.Errorf("8ball: pipe is not supported in 8ball")
 	}
-	fmt.Println("The Magic 8-Ball 🎱 says...")
-	contents = readContents()
-	_, err := output(contents)
-	if err != nil {
-		return err
-	}
+	io.WriteString(c.Stdout, "The Magic 8-Ball 🎱 says...")
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	selection8Ball := r.Intn(20)
 	time.Sleep(1 * time.Second)
 	if selection8Ball < 10 {
-		fmt.Printf("\033[32m%s\033[0m\n", reply8Ball[selection8Ball])
+		io.WriteString(c.Stdout, fmt.Sprintf("\033[32m%s\033[0m\n", reply8Ball[selection8Ball]))
 	} else if selection8Ball < 15 {
-		fmt.Printf("\033[33m%s\033[0m\n", reply8Ball[selection8Ball])
+		io.WriteString(c.Stdout, fmt.Sprintf("\033[33m%s\033[0m\n", reply8Ball[selection8Ball]))
 	} else {
-		fmt.Printf("\033[31m%s\033[0m\n", reply8Ball[selection8Ball])
+		io.WriteString(c.Stdout, fmt.Sprintf("\033[31m%s\033[0m\n", reply8Ball[selection8Ball]))
 	}
 	return nil
 }

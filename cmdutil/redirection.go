@@ -6,24 +6,6 @@ import (
 	"os/exec"
 )
 
-func redirection(mode int, file *os.File) { // 0: stdin, 1: stdout, 2: stderr
-	if mode == 0 {
-		os.Stdin = file
-	} else if mode == 1 {
-		//os.Stdout = file
-		Out = append(Out, file)
-		if Out[0] == Stdout {
-			Out = Out[1:]
-		}
-	} else {
-		//os.Stderr = file
-		Err = append(Err, file)
-		if Err[0] == Stderr {
-			Err = Err[1:]
-		}
-	}
-}
-
 func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, error) {
 	var returnFiles []*os.File
 	if mode == 0 {
@@ -120,27 +102,4 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 		return (len(returnFiles) > 0), returnFiles, nil
 	}
 	return false, []*os.File{}, nil
-}
-
-func resetRedirection(mode ...int) {
-	if len(mode) == 0 {
-		mode = []int{0, 1, 2}
-	}
-	if mode[0] == 0 {
-		mode = mode[1:]
-	}
-	if len(mode) == 0 {
-		return
-	}
-	if mode[0] == 1 {
-		Out = []*os.File{Stdout}
-		mode = mode[1:]
-	}
-	if len(mode) == 0 {
-		return
-	}
-	if mode[0] == 2 {
-		Err = []*os.File{Stderr}
-		return
-	}
 }
