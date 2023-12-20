@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 )
@@ -28,6 +29,10 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 	if mode == 0 {
 		rediretInFile := inSliceString([]string{"<"}, *args)
 		for rediretInFile >= 0 {
+			if len(*args) == rediretInFile+1 {
+				println(fmt.Errorf("redirection: missing redirection target for stdin"))
+				return false, []*os.File{}, nil
+			}
 			filePath, err := makePath(c, (*args)[rediretInFile+1])
 			if err != nil {
 				return false, []*os.File{}, err
@@ -45,6 +50,10 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 	if mode == 1 {
 		rediretOutFile := inSliceString([]string{">", "1>"}, *args)
 		for rediretOutFile >= 0 {
+			if len(*args) == rediretOutFile+1 {
+				println(fmt.Errorf("redirection: missing redirection target for stdout"))
+				return false, []*os.File{}, nil
+			}
 			var fileout *os.File
 			if (*args)[rediretOutFile+1] == "&2" {
 				fileout = Stdout
@@ -77,6 +86,10 @@ func checkRedirection(c *exec.Cmd, mode int, args *[]string) (bool, []*os.File, 
 	if mode == 2 {
 		rediretErrFile := inSliceString([]string{"2>", ">>"}, *args)
 		for rediretErrFile >= 0 {
+			if len(*args) == rediretErrFile+1 {
+				println(fmt.Errorf("redirection: missing redirection target for stderr"))
+				return false, []*os.File{}, nil
+			}
 			var fileout *os.File
 			if (*args)[rediretErrFile+1] == "&1" {
 				fileout = Stdout

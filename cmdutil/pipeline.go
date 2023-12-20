@@ -91,6 +91,11 @@ func run(c *exec.Cmd, command string, args ...string) error {
 func pipeline(c *exec.Cmd, command string, args ...string) error {
 	pipe = inSliceString([]string{"|"}, args)
 	for pipe >= 0 {
+		if len(args) == pipe+1 {
+			println(fmt.Errorf("pipeline: no commands after pipe"))
+			args = args[:pipe]
+			break
+		}
 		argsAfterPipe := args[pipe+1:]
 		args = args[:pipe]
 		err := run(c, command, args...)

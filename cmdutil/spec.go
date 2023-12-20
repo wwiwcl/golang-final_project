@@ -30,11 +30,16 @@ func runSpecCase(c *exec.Cmd, command string, args ...string) error {
 }
 
 func mkdir(c *exec.Cmd, args ...string) error {
-	fmt.Println(len(args))
+	if len(args) < 1 {
+		return fmt.Errorf("mkdir: missing argument")
+	}
 	return NewCmd(c, exec.Command("mkdir", "-p", args[0])).Run()
 }
 
 func chdir(c *exec.Cmd, args ...string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("chdir: missing argument")
+	}
 	cwd, err := Getcwd(c)
 	if err != nil {
 		return err
