@@ -102,7 +102,7 @@ func buildRun(c *exec.Cmd, args ...string) error {
 	if len(cmdPipeline) == 0 {
 		inRedirection = io.Reader(os.Stdin)
 	} else {
-		pipeStdout, err := cmdPipeline[len(cmdPipeline)-1].StdoutPipe()
+		pipeStdout, err := cmdPipeline[len(cmdPipeline)-1].StdoutPipe() // "exec: Stdout already set"
 		if err != nil {
 			return err
 		}
