@@ -31,6 +31,9 @@ func Getcwd(args ...*exec.Cmd) (string, error) {
 }
 
 func Runcmd(c *exec.Cmd, args ...string) error {
-	defer CloseFiles()
+	setBackgroundProcess(&args)
+	if !backgroundProcess {
+		defer CloseFiles()
+	}
 	return pipeline(c, args...)
 }

@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,9 +14,11 @@ var Stderr = os.Stderr
 var Stdout = os.Stdout
 var Cmd_alive bool
 var FilesToClose []*os.File
+var pipebuf []*bytes.Buffer
 var CwdColor int = 95
 var pipe int = -1
 var DefaultWd string
+var backgroundProcess bool = false
 
 func init() {
 	Cmd_alive = true

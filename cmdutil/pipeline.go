@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -102,30 +103,36 @@ func buildRun(c *exec.Cmd, args ...string) error {
 	if len(cmdPipeline) == 0 {
 		inRedirection = io.Reader(os.Stdin)
 	} else {
-		pipeStdout, err := cmdPipeline[len(cmdPipeline)-1].StdoutPipe() // "exec: Stdout already set"
-		if err != nil {
-			return err
-		}
-		inRedirection = io.Reader(pipeStdout)
+		pipeIn := bytes.NewReader(pipebuf[len(pipebuf)-1].Bytes())
+		inRedirection = pipeIn
 	}
 	redirectin, filein, err := checkRedirection(c, 0, &args)
 	if err != nil {
 		return err
 	}
 	if redirectin {
-		files := make([]io.Reader, len(filein)+1)
-		files[0] = inRedirection
+		files := make([]io.Reader, len(filein))
 		for i := 0; i < len(filein); i++ {
 			if filein[i] != Stdin && filein[i] != Stdout && filein[i] != Stderr {
 				FilesToClose = append(FilesToClose, filein[i])
 			}
-			files[i+1] = filein[i]
+			files[i] = filein[i]
+		}
+		if len(cmdPipeline) > 0 {
+			files = append(files, inRedirection)
 		}
 		inRedirection = io.MultiReader(files...)
 	}
 
 	// redirection stdout
-	outRedirection := io.MultiWriter(os.Stdout)
+	var outRedirection io.Writer
+	if pipe >= 0 {
+		newbuf := new(bytes.Buffer)
+		outRedirection = io.MultiWriter(newbuf)
+		pipebuf = append(pipebuf, newbuf)
+	} else {
+		outRedirection = io.MultiWriter(os.Stdout)
+	}
 	redirectout, fileout, err := checkRedirection(c, 1, &args)
 	if err != nil {
 		return err
@@ -137,6 +144,9 @@ func buildRun(c *exec.Cmd, args ...string) error {
 				FilesToClose = append(FilesToClose, fileout[i])
 			}
 			files[i] = fileout[i]
+		}
+		if pipe >= 0 {
+			files = append(files, outRedirection)
 		}
 		outRedirection = io.MultiWriter(files...)
 	}
@@ -191,20 +201,22 @@ func runCase(c *exec.Cmd) error {
 
 func runAll() error {
 	wg := new(sync.WaitGroup)
-	tasks := make(chan bool, len(cmdPipeline))
 	errors := make(chan error, len(cmdPipeline))
 	wg.Add(len(cmdPipeline))
 	for i := 0; i < len(cmdPipeline); i++ {
-		go func(i int, wg *sync.WaitGroup) {
-			defer wg.Done()
-			tasks <- true
-			err := runCase(cmdPipeline[i])
+		go func(c *exec.Cmd, wg *sync.WaitGroup, background bool) {
+			if background {
+				fmt.Printf("pid %d: %s\n", c.Process.Pid, c.Args[0])
+				wg.Done()
+			} else {
+				defer wg.Done()
+			}
+			err := runCase(c)
 			if err != nil {
 				println(err.Error())
 				errors <- err
 			}
-			<-tasks
-		}(i, wg)
+		}(cmdPipeline[i], wg, backgroundProcess)
 	}
 	wg.Wait()
 	return nil
@@ -212,6 +224,7 @@ func runAll() error {
 
 func pipeline(c *exec.Cmd, args ...string) error {
 	cmdPipeline = []*exec.Cmd{}
+	pipebuf = []*bytes.Buffer{}
 	pipe = inSliceString([]string{"|"}, args)
 	for pipe >= 0 {
 		if len(args) == pipe+1 {

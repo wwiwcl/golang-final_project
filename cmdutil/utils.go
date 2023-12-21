@@ -48,3 +48,11 @@ func makePath(c *exec.Cmd, path string) (string, error) {
 	}
 	return joinPath(root, path), nil
 }
+
+func setBackgroundProcess(args *[]string) {
+	backgroundProcess = false
+	if (*args)[len(*args)-1] == "&" {
+		*args = (*args)[:len(*args)-1]
+		backgroundProcess = true
+	}
+}
