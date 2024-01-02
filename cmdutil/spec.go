@@ -3,9 +3,8 @@ package cmdutil
 import (
 	"fmt"
 	"os/exec"
-	"strconv"
-
 	"sl"
+	"strconv"
 )
 
 var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
@@ -13,7 +12,7 @@ var command_keyword = map[string]func(c *exec.Cmd, args ...string) error{
 	"chdir":     chdir,
 	"cd":        chdir,
 	"exit":      exit,
-	"sl":        sl.Sl,
+	"sl":        sl.Animation,
 	"cls":       cls,
 	"starburst": sao,
 	"sb":        sao,

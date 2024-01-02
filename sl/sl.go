@@ -1,27 +1,30 @@
-package main
+package sl
 
 import (
+	"os/exec"
 	"time" // time.Sleep()
+
 	"seehuhn.de/go/ncurses" // https://pkg.go.dev/github.com/seehuhn/go-ncurses
 )
 
 // parameters
 var ACCIDENT, FLY, L, C bool = false, false, false, false
+
 // -a, -F, -l, -c
 
 // Car type: LOGO
 var LOGO = struct {
 	HEIGHT, FUNNEL, LENGTH, PATTERNS int
 
-	head		[]string
-	head_wheel	[][]string
-	coal		[]string
-	car			[]string
+	head       []string
+	head_wheel [][]string
+	coal       []string
+	car        []string
 }{
-	HEIGHT:		6,
-	FUNNEL:		4,
-	LENGTH:		84,
-	PATTERNS:	6,
+	HEIGHT:   6,
+	FUNNEL:   4,
+	LENGTH:   84,
+	PATTERNS: 6,
 
 	head: []string{
 		"     ++      +------ ",
@@ -167,14 +170,14 @@ var C51 = struct {
 var D51 = struct {
 	HEIGHT, FUNNEL, LENGTH, PATTERNS int
 
-	head		[]string
-	head_wheel	[][]string
-	coal		[]string
+	head       []string
+	head_wheel [][]string
+	coal       []string
 }{
-	HEIGHT:		10,
-	FUNNEL:		7,
-	LENGTH:		83,
-	PATTERNS:	6,
+	HEIGHT:   10,
+	FUNNEL:   7,
+	LENGTH:   83,
+	PATTERNS: 6,
 
 	head: []string{
 		"      ====        ________                ___________ ",
@@ -241,13 +244,13 @@ var D51 = struct {
 func my_MvAddStr(win *ncurses.Window, y int, x int, str string) {
 	TERM_LINES, TERM_WIDTH := win.GetMaxYX()
 
-    if y >= TERM_LINES || y < 0 || x >= TERM_WIDTH {
-        return
-    }else if x < 0 && len(str) + x >= 0 {
-		win.MvAddStr(y, 0, str[0 - x:])
-	}else if x + len(str) >= TERM_WIDTH && x < TERM_WIDTH {
-		win.MvAddStr(y, x, str[:TERM_WIDTH - x])
-	}else if x >= 0 && x < TERM_WIDTH {
+	if y >= TERM_LINES || y < 0 || x >= TERM_WIDTH {
+		return
+	} else if x < 0 && len(str)+x >= 0 {
+		win.MvAddStr(y, 0, str[0-x:])
+	} else if x+len(str) >= TERM_WIDTH && x < TERM_WIDTH {
+		win.MvAddStr(y, x, str[:TERM_WIDTH-x])
+	} else if x >= 0 && x < TERM_WIDTH {
 		win.MvAddStr(y, x, str[:])
 	}
 }
@@ -255,26 +258,25 @@ func my_MvAddStr(win *ncurses.Window, y int, x int, str string) {
 // Smoke
 func add_smoke(win *ncurses.Window, y int, x int) {
 	var smoke = [][]string{
-		{	"(   )", "(    )", "(    )", "(   )", "(  )",
-			"(  )" , "( )"   , "( )"   , "()"   , "()"  ,
-			"O"    , "O"     , "O"     , "O"    , "O"   ,
-			" ",											},
-		{	"(@@@)", "(@@@@)", "(@@@@)", "(@@@)", "(@@)",
-			"(@@)" , "(@)"   , "(@)"   , "@@"   , "@@"  ,
-			"@"    , "@"     , "@"     , "@"    , "@"   ,
-			" ",											},
+		{"(   )", "(    )", "(    )", "(   )", "(  )",
+			"(  )", "( )", "( )", "()", "()",
+			"O", "O", "O", "O", "O",
+			" "},
+		{"(@@@)", "(@@@@)", "(@@@@)", "(@@@)", "(@@)",
+			"(@@)", "(@)", "(@)", "@@", "@@",
+			"@", "@", "@", "@", "@",
+			" "},
 	}
 
-	var dy = []int{  2,  1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	var dx = []int{ -2, -1, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3 };
-
+	var dy = []int{2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	var dx = []int{-2, -1, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3}
 
 	var tempY, tempX, pattern int = y, x - (x % 4), (x / 2) % 2
 	if pattern < 0 {
-		pattern = - pattern
+		pattern = -pattern
 	}
 
-	for i := 0; i < 16; i++{
+	for i := 0; i < 16; i++ {
 		my_MvAddStr(win, tempY, tempX, smoke[pattern][i])
 
 		tempY -= dy[i]
@@ -288,77 +290,77 @@ func add_smoke(win *ncurses.Window, y int, x int) {
 func add_LOGO(win *ncurses.Window, x int) {
 	// Get the size of the terminal
 	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
-	var y = TERM_LINES / 2 - 3
+	var y = TERM_LINES/2 - 3
 
 	for i := 0; i < LOGO.HEIGHT; i++ {
 		if i < 4 {
-			my_MvAddStr(win, y + i, x, LOGO.head[i])
-		}else {
-			my_MvAddStr(win, y + i, x, LOGO.head_wheel[(LOGO.LENGTH + x) % LOGO.PATTERNS][i - 4])
+			my_MvAddStr(win, y+i, x, LOGO.head[i])
+		} else {
+			my_MvAddStr(win, y+i, x, LOGO.head_wheel[(LOGO.LENGTH+x)%LOGO.PATTERNS][i-4])
 		}
 
-		my_MvAddStr(win, y + i, x + 21, LOGO.coal[i])
-		my_MvAddStr(win, y + i, x + 42, LOGO.car[i])
-		my_MvAddStr(win, y + i, x + 63, LOGO.car[i])
+		my_MvAddStr(win, y+i, x+21, LOGO.coal[i])
+		my_MvAddStr(win, y+i, x+42, LOGO.car[i])
+		my_MvAddStr(win, y+i, x+63, LOGO.car[i])
 	}
 
 	if ACCIDENT == true {
-		add_man(win, y + 1, x + 14)
+		add_man(win, y+1, x+14)
 
-		add_man(win, y + 1, x + 45)
-		add_man(win, y + 1, x + 53)
+		add_man(win, y+1, x+45)
+		add_man(win, y+1, x+53)
 
-		add_man(win, y + 1, x + 66)
-		add_man(win, y + 1, x + 74)
+		add_man(win, y+1, x+66)
+		add_man(win, y+1, x+74)
 	}
 
-	add_smoke(win, y - 1, x + LOGO.FUNNEL)
+	add_smoke(win, y-1, x+LOGO.FUNNEL)
 }
 
 func add_D51(win *ncurses.Window, x int) {
 	// Get the size of the terminal
 	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
-	var y = TERM_LINES / 2 - 5
+	var y = TERM_LINES/2 - 5
 
 	for i := 0; i < D51.HEIGHT; i++ {
 		if i < 7 {
-			my_MvAddStr(win, y + i, x, D51.head[i])
-		}else {
-			my_MvAddStr(win, y + i, x, D51.head_wheel[(D51.LENGTH + x) % D51.PATTERNS][i - 7])
+			my_MvAddStr(win, y+i, x, D51.head[i])
+		} else {
+			my_MvAddStr(win, y+i, x, D51.head_wheel[(D51.LENGTH+x)%D51.PATTERNS][i-7])
 		}
 
-		my_MvAddStr(win, y + i, x + 53, D51.coal[i])
-	}
-	
-	if ACCIDENT == true {
-        add_man(win, y + 2, x + 43)
-        add_man(win, y + 2, x + 47)
+		my_MvAddStr(win, y+i, x+53, D51.coal[i])
 	}
 
-	add_smoke(win, y - 1, x + D51.FUNNEL)
+	if ACCIDENT == true {
+		add_man(win, y+2, x+43)
+		add_man(win, y+2, x+47)
+	}
+
+	add_smoke(win, y-1, x+D51.FUNNEL)
 }
 
-func add_C51(win *ncurses.Window, x int){
+func add_C51(win *ncurses.Window, x int) {
 	// Get the size of the terminal
 	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
-	var y = TERM_LINES / 2 - 5
+	var y = TERM_LINES/2 - 5
 
 	for i := 0; i < C51.HEIGHT; i++ {
 		if i < 7 {
-			my_MvAddStr(win, y + i, x, C51.head[i])
-		}else {
-			my_MvAddStr(win, y + i, x, C51.head_wheel[(C51.LENGTH + x) % C51.PATTERNS][i - 7])
+			my_MvAddStr(win, y+i, x, C51.head[i])
+		} else {
+			my_MvAddStr(win, y+i, x, C51.head_wheel[(C51.LENGTH+x)%C51.PATTERNS][i-7])
 		}
 
-		my_MvAddStr(win, y + i, x + 55, C51.coal[i])
-	}
-	
-	if ACCIDENT == true {
-        add_man(win, y + 3, x + 45)
-        add_man(win, y + 3, x + 49)
+		my_MvAddStr(win, y+i, x+55, C51.coal[i])
 	}
 
-	add_smoke(win, y - 1, x + C51.FUNNEL)
+	if ACCIDENT == true {
+		add_man(win, y+3, x+45)
+		add_man(win, y+3, x+49)
+	}
+
+	add_smoke(win, y-1, x+C51.FUNNEL)
 }
 
 func add_man(win *ncurses.Window, y int, x int) {
@@ -366,20 +368,20 @@ func add_man(win *ncurses.Window, y int, x int) {
 		{
 			"",
 			"(O)",
-		}, 
+		},
 
 		{
 			"Help!",
 			"\\O/",
 		},
-	};
+	}
 
-	for i := 0; i < 2; i++{
-        my_MvAddStr(win, y + i, x, man[(LOGO.LENGTH + x) / 12 % 2][i]);
-    }
+	for i := 0; i < 2; i++ {
+		my_MvAddStr(win, y+i, x, man[(LOGO.LENGTH+x)/12%2][i])
+	}
 }
 
-func animation(){
+func Animation(c *exec.Cmd, args ...string) error {
 	win := ncurses.Init()
 	defer ncurses.EndWin()
 
@@ -389,21 +391,21 @@ func animation(){
 	// Set the cursor's visibility to 0
 	_, _ = ncurses.CursSet(ncurses.CursorOff)
 
-	for i := TERM_WIDTH - 1; ; i--{
+	for i := TERM_WIDTH - 1; ; i-- {
 		win.Erase()
-		
+
 		if L == true {
-			if i + LOGO.LENGTH < 0 {
+			if i+LOGO.LENGTH < 0 {
 				break
 			}
 			add_LOGO(win, i)
-		}else if C == true {
-			if i + C51.LENGTH < 0 {
+		} else if C == true {
+			if i+C51.LENGTH < 0 {
 				break
 			}
 			add_C51(win, i)
-		}else {
-			if i + D51.LENGTH < 0 {
+		} else {
+			if i+D51.LENGTH < 0 {
 				break
 			}
 			add_D51(win, i)
@@ -417,12 +419,10 @@ func animation(){
 	win.Refresh()
 
 	time.Sleep(100 * time.Millisecond)
+	return nil
 }
 
 // Main
-func main() {
-	animation()
-}
 
 /*
 
@@ -434,7 +434,7 @@ default car type: D51
 
 !!! seehuhn.de/go/ncurses sucks :P !!!
 
-	in: ~~\go\pkg\mod\seehuhn.de\go\ncurses@v0.2.0\keys.go
+	in: $GOROOT/pkg/mod/seehuhn.de/go/ncurses@v0.2.0/keys.go
 
 	line 171:
 		Original:	C.KEY_EVENT:     KeyEvent,
