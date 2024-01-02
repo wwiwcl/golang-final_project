@@ -25,8 +25,15 @@ func main() {
 			fmt.Fprintln(cmdutil.Stderr, "InputError:", err)
 			continue
 		}
-		args := strings.Split(string(input), " ")
+		args := strings.Split(string(input), "\"")
+		tmp_build_args := []string{}
+		tmp_args := []string{}
 		if len(args) > 0 {
+			for _, arg := range args {
+				tmp_args = strings.Split(arg, " ")
+				tmp_build_args = append(tmp_build_args, tmp_args...)
+			}
+			args = tmp_build_args
 			err := cmdutil.Runcmd(c, args...)
 			if err != nil {
 				fmt.Fprintln(cmdutil.Stderr, err)
