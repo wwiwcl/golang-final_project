@@ -1,169 +1,443 @@
-/*source: https://github.com/mtoyoda/sl*/
-
-package sl
+package main
 
 import (
-	"fmt"
-	"os/exec"
+	"time" // time.Sleep()
+	"seehuhn.de/go/ncurses" // https://pkg.go.dev/github.com/seehuhn/go-ncurses
 )
 
-func Sl(c *exec.Cmd, args ...string) error {
-	fmt.Println("sl has not done yet") // TODO
-	return nil
+// parameters
+var ACCIDENT, FLY, L, C bool = false, false, false, false
+// -a, -F, -l, -c
+
+// Car type: LOGO
+var LOGO = struct {
+	HEIGHT, FUNNEL, LENGTH, PATTERNS int
+
+	head		[]string
+	head_wheel	[][]string
+	coal		[]string
+	car			[]string
+}{
+	HEIGHT:		6,
+	FUNNEL:		4,
+	LENGTH:		84,
+	PATTERNS:	6,
+
+	head: []string{
+		"     ++      +------ ",
+		"     ||      |+-+ |  ",
+		"   /---------|| | |  ",
+		"  + ========  +-+ |  ",
+	},
+
+	head_wheel: [][]string{
+		{
+			" _|--O========O~\\-+  ",
+			"//// \\_/      \\_/    ",
+		},
+
+		{
+			" _|--/O========O\\-+  ",
+			"//// \\_/      \\_/    ",
+		},
+
+		{
+			" _|--/~O========O-+  ",
+			"//// \\_/      \\_/    ",
+		},
+
+		{
+			" _|--/~\\------/~\\-+  ",
+			"//// \\_O========O    ",
+		},
+
+		{
+			" _|--/~\\------/~\\-+  ",
+			"//// \\O========O/    ",
+		},
+
+		{
+			" _|--/~\\------/~\\-+  ",
+			"//// O========O_/    ",
+		},
+	},
+
+	coal: []string{
+		"____                 ",
+		"|   \\@@@@@@@@@@@     ",
+		"|    \\@@@@@@@@@@@@@_ ",
+		"|                  | ",
+		"|__________________| ",
+		"   (O)       (O)     ",
+	},
+
+	car: []string{
+		"____________________ ",
+		"|  ___ ___ ___ ___ | ",
+		"|  |_| |_| |_| |_| | ",
+		"|__________________| ",
+		"|__________________| ",
+		"   (O)        (O)    ",
+	},
 }
 
-const D51HEIGHT int = 10
-const D51FUNNEL int = 7
-const D51LENGTH int = 83
-const D51PATTERNS int = 6
+// Car type: C51
+var C51 = struct {
+	HEIGHT, FUNNEL, LENGTH, PATTERNS int
 
-const D51STR1 string = "      ====        ________                ___________ "
-const D51STR2 string = "  _D _|  |_______/        \\__I_I_____===__|_________| "
-const D51STR3 string = "   |(_)---  |   H\\________/ |   |        =|___ ___|   "
-const D51STR4 string = "   /     |  |   H  |  |     |   |         ||_| |_||   "
-const D51STR5 string = "  |      |  |   H  |__--------------------| [___] |   "
-const D51STR6 string = "  | ________|___H__/__|_____/[][]~\\_______|       |   "
-const D51STR7 string = "  |/ |   |-----------I_____I [][] []  D   |=======|__ "
+	head       []string
+	head_wheel [][]string
+	coal       []string
+}{
+	HEIGHT:   11,
+	FUNNEL:   7,
+	LENGTH:   87,
+	PATTERNS: 6,
 
-const D51WHL11 string = "__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ "
-const D51WHL12 string = " |/-=|___|=    ||    ||    ||    |_____/~\\___/        "
-const D51WHL13 string = "  \\_/      \\O=====O=====O=====O_/      \\_/            "
+	head: []string{
+		"        ___                                            ",
+		"       _|_|_  _     __       __             ___________",
+		"    D__/   \\_(_)___|  |__H__|  |_____I_Ii_()|_________|",
+		"     | `---'   |:: `--'  H  `--'         |  |___ ___|  ",
+		"    +|~~~~~~~~++::~~~~~~~H~~+=====+~~~~~~|~~||_| |_||  ",
+		"    ||        | ::       H  +=====+      |  |::  ...|  ",
+		"|    | _______|_::-----------------[][]-----|       |  ",
+	},
 
-const D51WHL21 string = "__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ "
-const D51WHL22 string = " |/-=|___|=O=====O=====O=====O   |_____/~\\___/        "
-const D51WHL23 string = "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            "
+	head_wheel: [][]string{
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|=[]=-      ||      ||      |  ||=======_|__",
+			"/~\\____|___|/~\\_|  O=======O=======O   |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
 
-const D51WHL31 string = "__/ =| o |=-O=====O=====O=====O \\ ____Y___________|__ "
-const D51WHL32 string = " |/-=|___|=    ||    ||    ||    |_____/~\\___/        "
-const D51WHL33 string = "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            "
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|=[]=- O=======O=======O    |  ||=======_|__",
+			"/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
 
-const D51WHL41 string = "__/ =| o |=-~O=====O=====O=====O\\ ____Y___________|__ "
-const D51WHL42 string = " |/-=|___|=    ||    ||    ||    |_____/~\\___/        "
-const D51WHL43 string = "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            "
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|==[]=- O=======O=======O   |  ||=======_|__",
+			"/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
 
-const D51WHL51 string = "__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ "
-const D51WHL52 string = " |/-=|___|=   O=====O=====O=====O|_____/~\\___/        "
-const D51WHL53 string = "  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            "
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|===[]=- O=======O=======O  |  ||=======_|__",
+			"/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
 
-const D51WHL61 string = "__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ "
-const D51WHL62 string = " |/-=|___|=    ||    ||    ||    |_____/~\\___/        "
-const D51WHL63 string = "  \\_/      \\_O=====O=====O=====O/      \\_/            "
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|===[]=-    ||      ||      |  ||=======_|__",
+			"/~\\____|___|/~\\_|    O=======O=======O |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
 
-const D51DEL string = "                                                      "
+		{
+			"| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__",
+			"------'|oOo|==[]=-     ||      ||      |  ||=======_|__",
+			"/~\\____|___|/~\\_|   O=======O=======O  |__|+-/~\\_|     ",
+			"\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       ",
+		},
+	},
 
-const COAL01 string = "                              "
-const COAL02 string = "                              "
-const COAL03 string = "    _________________         "
-const COAL04 string = "   _|                \\_____A  "
-const COAL05 string = " =|                        |  "
-const COAL06 string = " -|                        |  "
-const COAL07 string = "__|________________________|_ "
-const COAL08 string = "|__________________________|_ "
-const COAL09 string = "   |_D__D__D_|  |_D__D__D_|   "
-const COAL10 string = "    \\_/   \\_/    \\_/   \\_/    "
+	coal: []string{
+		"                              ",
+		"                              ",
+		"                              ",
+		"    _________________         ",
+		"   _|                \\_____A  ",
+		" =|                        |  ",
+		" -|                        |  ",
+		"__|________________________|_ ",
+		"|__________________________|_ ",
+		"   |_D__D__D_|  |_D__D__D_|   ",
+		"    \\_/   \\_/    \\_/   \\_/    ",
+	},
+}
 
-const COALDEL string = "                              "
+// Car type: D51
+var D51 = struct {
+	HEIGHT, FUNNEL, LENGTH, PATTERNS int
 
-const LOGOHEIGHT int = 6
-const LOGOFUNNEL int = 4
-const LOGOLENGTH int = 84
-const LOGOPATTERNS int = 6
+	head		[]string
+	head_wheel	[][]string
+	coal		[]string
+}{
+	HEIGHT:		10,
+	FUNNEL:		7,
+	LENGTH:		83,
+	PATTERNS:	6,
 
-const LOGO1 string = "     ++      +------ "
-const LOGO2 string = "     ||      |+-+ |  "
-const LOGO3 string = "   /---------|| | |  "
-const LOGO4 string = "  + ========  +-+ |  "
+	head: []string{
+		"      ====        ________                ___________ ",
+		"  _D _|  |_______/        \\__I_I_____===__|_________| ",
+		"   |(_)---  |   H\\________/ |   |        =|___ ___|   ",
+		"   /     |  |   H  |  |     |   |         ||_| |_||   ",
+		"  |      |  |   H  |__--------------------| [___] |   ",
+		"  | ________|___H__/__|_____/[][]~\\_______|       |   ",
+		"  |/ |   |-----------I_____I [][] []  D   |=======|__ ",
+	},
 
-const LWHL11 string = " _|--O========O~\\-+  "
-const LWHL12 string = "//// \\_/      \\_/    "
+	head_wheel: [][]string{
+		{
+			"__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ ",
+			" |/-=|___|=    ||    ||    ||    |_____/~\\___/        ",
+			"  \\_/      \\O=====O=====O=====O_/      \\_/            ",
+		},
 
-const LWHL21 string = " _|--/O========O\\-+  "
-const LWHL22 string = "//// \\_/      \\_/    "
+		{
+			"__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ ",
+			" |/-=|___|=O=====O=====O=====O   |_____/~\\___/        ",
+			"  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            ",
+		},
 
-const LWHL31 string = " _|--/~O========O-+  "
-const LWHL32 string = "//// \\_/      \\_/    "
+		{
+			"__/ =| o |=-O=====O=====O=====O \\ ____Y___________|__ ",
+			" |/-=|___|=    ||    ||    ||    |_____/~\\___/        ",
+			"  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            ",
+		},
 
-const LWHL41 string = " _|--/~\\------/~\\-+  "
-const LWHL42 string = "//// \\_O========O    "
+		{
+			"__/ =| o |=-~O=====O=====O=====O\\ ____Y___________|__ ",
+			" |/-=|___|=    ||    ||    ||    |_____/~\\___/        ",
+			"  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            ",
+		},
 
-const LWHL51 string = " _|--/~\\------/~\\-+  "
-const LWHL52 string = "//// \\O========O/    "
+		{
+			"__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ ",
+			" |/-=|___|=   O=====O=====O=====O|_____/~\\___/        ",
+			"  \\_/      \\__/  \\__/  \\__/  \\__/      \\_/            ",
+		},
 
-const LWHL61 string = " _|--/~\\------/~\\-+  "
-const LWHL62 string = "//// O========O_/    "
+		{
+			"__/ =| o |=-~~\\  /~~\\  /~~\\  /~~\\ ____Y___________|__ ",
+			" |/-=|___|=    ||    ||    ||    |_____/~\\___/        ",
+			"  \\_/      \\_O=====O=====O=====O/      \\_/            ",
+		},
+	},
 
-const LCOAL1 string = "____                 "
-const LCOAL2 string = "|   \\@@@@@@@@@@@     "
-const LCOAL3 string = "|    \\@@@@@@@@@@@@@_ "
-const LCOAL4 string = "|                  | "
-const LCOAL5 string = "|__________________| "
-const LCOAL6 string = "   (O)       (O)     "
+	coal: []string{
+		"                              ",
+		"                              ",
+		"    _________________         ",
+		"   _|                \\_____A  ",
+		" =|                        |  ",
+		" -|                        |  ",
+		"__|________________________|_ ",
+		"|__________________________|_ ",
+		"   |_D__D__D_|  |_D__D__D_|   ",
+		"    \\_/   \\_/    \\_/   \\_/    ",
+	},
+}
 
-const LCAR1 string = "____________________ "
-const LCAR2 string = "|  ___ ___ ___ ___ | "
-const LCAR3 string = "|  |_| |_| |_| |_| | "
-const LCAR4 string = "|__________________| "
-const LCAR5 string = "|__________________| "
-const LCAR6 string = "   (O)        (O)    "
+func my_MvAddStr(win *ncurses.Window, y int, x int, str string) {
+	TERM_LINES, TERM_WIDTH := win.GetMaxYX()
 
-const DELLN string = "                     "
+    if y >= TERM_LINES || y < 0 || x >= TERM_WIDTH {
+        return
+    }else if x < 0 && len(str) + x >= 0 {
+		win.MvAddStr(y, 0, str[0 - x:])
+	}else if x + len(str) >= TERM_WIDTH && x < TERM_WIDTH {
+		win.MvAddStr(y, x, str[:TERM_WIDTH - x])
+	}else if x >= 0 && x < TERM_WIDTH {
+		win.MvAddStr(y, x, str[:])
+	}
+}
 
-const C51HEIGHT int = 11
-const C51FUNNEL int = 7
-const C51LENGTH int = 87
-const C51PATTERNS int = 6
+// Smoke
+func add_smoke(win *ncurses.Window, y int, x int) {
+	var smoke = [][]string{
+		{	"(   )", "(    )", "(    )", "(   )", "(  )",
+			"(  )" , "( )"   , "( )"   , "()"   , "()"  ,
+			"O"    , "O"     , "O"     , "O"    , "O"   ,
+			" ",											},
+		{	"(@@@)", "(@@@@)", "(@@@@)", "(@@@)", "(@@)",
+			"(@@)" , "(@)"   , "(@)"   , "@@"   , "@@"  ,
+			"@"    , "@"     , "@"     , "@"    , "@"   ,
+			" ",											},
+	}
 
-const C51DEL string = "                                                       "
+	var dy = []int{  2,  1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	var dx = []int{ -2, -1, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3 };
 
-const C51STR1 string = "        ___                                            "
-const C51STR2 string = "       _|_|_  _     __       __             ___________"
-const C51STR3 string = "    D__/   \\_(_)___|  |__H__|  |_____I_Ii_()|_________|"
-const C51STR4 string = "     | `---'   |:: `--'  H  `--'         |  |___ ___|  "
-const C51STR5 string = "    +|~~~~~~~~++::~~~~~~~H~~+=====+~~~~~~|~~||_| |_||  "
-const C51STR6 string = "    ||        | ::       H  +=====+      |  |::  ...|  "
-const C51STR7 string = "|    | _______|_::-----------------[][]-----|       |  "
 
-const C51WH61 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH62 string = "------'|oOo|==[]=-     ||      ||      |  ||=======_|__"
-const C51WH63 string = "/~\\____|___|/~\\_|   O=======O=======O  |__|+-/~\\_|     "
-const C51WH64 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+	var tempY, tempX, pattern int = y, x - (x % 4), (x / 2) % 2
+	if pattern < 0 {
+		pattern = - pattern
+	}
 
-const C51WH51 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH52 string = "------'|oOo|===[]=-    ||      ||      |  ||=======_|__"
-const C51WH53 string = "/~\\____|___|/~\\_|    O=======O=======O |__|+-/~\\_|     "
-const C51WH54 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+	for i := 0; i < 16; i++{
+		my_MvAddStr(win, tempY, tempX, smoke[pattern][i])
 
-const C51WH41 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH42 string = "------'|oOo|===[]=- O=======O=======O  |  ||=======_|__"
-const C51WH43 string = "/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     "
-const C51WH44 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+		tempY -= dy[i]
+		tempX += dx[i] + len(smoke[pattern][i])
 
-const C51WH31 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH32 string = "------'|oOo|==[]=- O=======O=======O   |  ||=======_|__"
-const C51WH33 string = "/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     "
-const C51WH34 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+		pattern = 1 - pattern
+	}
+}
 
-const C51WH21 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH22 string = "------'|oOo|=[]=- O=======O=======O    |  ||=======_|__"
-const C51WH23 string = "/~\\____|___|/~\\_|      ||      ||      |__|+-/~\\_|     "
-const C51WH24 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+// Output a single frame
+func add_LOGO(win *ncurses.Window, x int) {
+	// Get the size of the terminal
+	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
+	var y = TERM_LINES / 2 - 3
 
-const C51WH11 string = "| /~~ ||   |-----/~~~~\\  /[I_____I][][] --|||_______|__"
-const C51WH12 string = "------'|oOo|=[]=-      ||      ||      |  ||=======_|__"
-const C51WH13 string = "/~\\____|___|/~\\_|  O=======O=======O   |__|+-/~\\_|     "
-const C51WH14 string = "\\_/         \\_/  \\____/  \\____/  \\____/      \\_/       "
+	for i := 0; i < LOGO.HEIGHT; i++ {
+		if i < 4 {
+			my_MvAddStr(win, y + i, x, LOGO.head[i])
+		}else {
+			my_MvAddStr(win, y + i, x, LOGO.head_wheel[(LOGO.LENGTH + x) % LOGO.PATTERNS][i - 4])
+		}
 
-const (
-	Cols          = 80
-	Rows          = 24
-	LogoPatterns  = 6
-	LogoHeight    = 6
-	LogoLength    = 80
-	D51Patterns   = 6
-	D51Height     = 10
-	D51Length     = 80
-	C51Patterns   = 6
-	C51Height     = 11
-	C51Length     = 80
-	SmokePatterns = 16
-)
+		my_MvAddStr(win, y + i, x + 21, LOGO.coal[i])
+		my_MvAddStr(win, y + i, x + 42, LOGO.car[i])
+		my_MvAddStr(win, y + i, x + 63, LOGO.car[i])
+	}
+
+	if ACCIDENT == true {
+		add_man(win, y + 1, x + 14)
+
+		add_man(win, y + 1, x + 45)
+		add_man(win, y + 1, x + 53)
+
+		add_man(win, y + 1, x + 66)
+		add_man(win, y + 1, x + 74)
+	}
+
+	add_smoke(win, y - 1, x + LOGO.FUNNEL)
+}
+
+func add_D51(win *ncurses.Window, x int) {
+	// Get the size of the terminal
+	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
+	var y = TERM_LINES / 2 - 5
+
+	for i := 0; i < D51.HEIGHT; i++ {
+		if i < 7 {
+			my_MvAddStr(win, y + i, x, D51.head[i])
+		}else {
+			my_MvAddStr(win, y + i, x, D51.head_wheel[(D51.LENGTH + x) % D51.PATTERNS][i - 7])
+		}
+
+		my_MvAddStr(win, y + i, x + 53, D51.coal[i])
+	}
+	
+	if ACCIDENT == true {
+        add_man(win, y + 2, x + 43)
+        add_man(win, y + 2, x + 47)
+	}
+
+	add_smoke(win, y - 1, x + D51.FUNNEL)
+}
+
+func add_C51(win *ncurses.Window, x int){
+	// Get the size of the terminal
+	TERM_LINES, _ := win.GetMaxYX() // _ = TERM_WIDTH
+	var y = TERM_LINES / 2 - 5
+
+	for i := 0; i < C51.HEIGHT; i++ {
+		if i < 7 {
+			my_MvAddStr(win, y + i, x, C51.head[i])
+		}else {
+			my_MvAddStr(win, y + i, x, C51.head_wheel[(C51.LENGTH + x) % C51.PATTERNS][i - 7])
+		}
+
+		my_MvAddStr(win, y + i, x + 55, C51.coal[i])
+	}
+	
+	if ACCIDENT == true {
+        add_man(win, y + 3, x + 45)
+        add_man(win, y + 3, x + 49)
+	}
+
+	add_smoke(win, y - 1, x + C51.FUNNEL)
+}
+
+func add_man(win *ncurses.Window, y int, x int) {
+	var man = [][]string{
+		{
+			"",
+			"(O)",
+		}, 
+
+		{
+			"Help!",
+			"\\O/",
+		},
+	};
+
+	for i := 0; i < 2; i++{
+        my_MvAddStr(win, y + i, x, man[(LOGO.LENGTH + x) / 12 % 2][i]);
+    }
+}
+
+func animation(){
+	win := ncurses.Init()
+	defer ncurses.EndWin()
+
+	// Get the size of the terminal
+	_, TERM_WIDTH := win.GetMaxYX() // _ = TERM_LINES
+
+	// Set the cursor's visibility to 0
+	_, _ = ncurses.CursSet(ncurses.CursorOff)
+
+	for i := TERM_WIDTH - 1; ; i--{
+		win.Erase()
+		
+		if L == true {
+			if i + LOGO.LENGTH < 0 {
+				break
+			}
+			add_LOGO(win, i)
+		}else if C == true {
+			if i + C51.LENGTH < 0 {
+				break
+			}
+			add_C51(win, i)
+		}else {
+			if i + D51.LENGTH < 0 {
+				break
+			}
+			add_D51(win, i)
+		}
+
+		win.Refresh()
+
+		time.Sleep(50 * time.Millisecond) // 0.05s, fps = 20
+	}
+
+	win.Refresh()
+
+	time.Sleep(100 * time.Millisecond)
+}
+
+// Main
+func main() {
+	animation()
+}
+
+/*
+
+// ---------- NOTES ---------- //
+
+sl source code: https://github.com/mtoyoda/sl/blob/master/sl.c
+
+default car type: D51
+
+!!! seehuhn.de/go/ncurses sucks :P !!!
+
+	in: ~~\go\pkg\mod\seehuhn.de\go\ncurses@v0.2.0\keys.go
+
+	line 171:
+		Original:	C.KEY_EVENT:     KeyEvent,
+		Fixed:		// C.KEY_EVENT:     KeyEvent,
+
+*/
