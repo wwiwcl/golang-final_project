@@ -10,7 +10,7 @@ import (
 // parameters
 var ACCIDENT, FLY, L, C bool = false, false, false, false
 
-// -a, -F, -l, -c
+// -a, -f, -l, -c
 
 // Car type: LOGO
 var LOGO = struct {
@@ -382,6 +382,32 @@ func add_man(win *ncurses.Window, y int, x int) {
 }
 
 func Animation(c *exec.Cmd, args ...string) error {
+	// var ACCIDENT, FLY, L, C bool = false, false, false, false
+	eastereggAccident := inSliceString([]string{"-a"}, args)
+	if eastereggAccident >= 0 {
+		ACCIDENT = true
+	} else {
+		ACCIDENT = false
+	}
+	eastereggFly := inSliceString([]string{"-f"}, args)
+	if eastereggFly >= 0 {
+		FLY = true
+	} else {
+		FLY = false
+	}
+	eastereggL := inSliceString([]string{"-l"}, args)
+	if eastereggL >= 0 {
+		L = true
+	} else {
+		L = false
+	}
+	eastereggC := inSliceString([]string{"-c"}, args)
+	if eastereggC >= 0 {
+		C = true
+	} else {
+		C = false
+	}
+
 	win := ncurses.Init()
 	defer ncurses.EndWin()
 
@@ -434,7 +460,7 @@ default car type: D51
 
 !!! seehuhn.de/go/ncurses sucks :P !!!
 
-	in: $GOROOT/pkg/mod/seehuhn.de/go/ncurses@v0.2.0/keys.go
+	in: /go/pkg/mod/seehuhn.de/go/ncurses@v0.2.0/keys.go
 
 	line 171:
 		Original:	C.KEY_EVENT:     KeyEvent,

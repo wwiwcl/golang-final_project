@@ -49,11 +49,13 @@ func cat(c *exec.Cmd, args ...string) error {
 　| (￣ヽ＿_ヽ_)__)
 　＼二つ`+"\n")
 	}
-	err := NewCmd(c, exec.Command("cat", args...)).Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	c.Args = []string{"cat"}
+	c.Args = append(c.Args, args...)
+	// err := NewCmd(c, exec.Command("cat", args...)).Run()
+	// if err != nil {
+	// 	return err
+	// }
+	return c.Run()
 }
 
 func neverGonnaGiveYouUp(c *exec.Cmd, args ...string) error {
@@ -193,7 +195,7 @@ func magic8Ball(c *exec.Cmd, args ...string) error {
 	if pipe >= 0 {
 		return fmt.Errorf("8ball: pipe is not supported in 8ball")
 	}
-	io.WriteString(c.Stdout, "The Magic 8-Ball 🎱 says...")
+	io.WriteString(c.Stdout, "The Magic 8-Ball 🎱 says...\n")
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	selection8Ball := r.Intn(20)
 	time.Sleep(1 * time.Second)
