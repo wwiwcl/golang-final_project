@@ -49,7 +49,7 @@ func cat(c *exec.Cmd, args ...string) error {
 　| (￣ヽ＿_ヽ_)__)
 　＼二つ`+"\n")
 	}
-	if len(args) >= 0 {
+	if len(args) > 0 {
 		c.Args = []string{"cat"}
 		c.Args = append(c.Args, args...)
 		return c.Run()
