@@ -1,4 +1,4 @@
-module fp
+module sl
 
 go 1.20
 
