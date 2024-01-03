@@ -51,6 +51,7 @@ func chdir(c *exec.Cmd, args ...string) error {
 		c.Dir = cwd
 		return fmt.Errorf("directory %s does not exist", args[0])
 	}
+	DefaultWd = c.Dir
 	return nil
 }
 

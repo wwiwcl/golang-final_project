@@ -13,10 +13,8 @@ func main() {
 	defer cmdutil.CloseFiles()
 	c := exec.Command("ls")
 	for cmdutil.Cmd_alive {
-		wd, err := cmdutil.Getcwd(c)
-		if err != nil {
-			fmt.Fprintln(cmdutil.Stderr, err)
-		}
+		c.Dir = cmdutil.DefaultWd
+		wd := cmdutil.DefaultWd
 		fmt.Fprintf(cmdutil.Stdout, "\033[%dm%s\033[0m", cmdutil.CwdColor, wd)
 		fmt.Fprint(cmdutil.Stdout, "$ ")
 		reader := bufio.NewReader(cmdutil.Stdin)
