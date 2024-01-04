@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"cmdutil"
@@ -11,6 +12,12 @@ import (
 
 func main() {
 	defer cmdutil.CloseFiles()
+
+	runOS := strings.ToLower(runtime.GOOS)
+	if !(strings.Contains(runOS, "linux") || strings.Contains(runOS, "darwin") || strings.Contains(runOS, "bsd")) {
+		println("Non-Unix-like operating system detected.\nThis project only works on Unix-like operating systems.\n")
+		return
+	}
 	c := exec.Command("ls")
 	for cmdutil.Cmd_alive {
 		c.Dir = cmdutil.DefaultWd
